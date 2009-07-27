@@ -1,0 +1,141 @@
+#!/usr/bin/ruby
+
+####---------------------------------------------------------------------------------------------------------
+SYNLIB = "#{File.dirname($0)}/../lib"
+$:.unshift(SYNLIB) unless $:.include?(SYNLIB)
+
+####---------------------------------------------------------------------------------------------------------
+require 'optparse'
+require 'synaptic4r'
+require 'logger'
+require "#{File.dirname($0)}/examples"
+
+#############################################################################################################
+####---------------------------------------------------------------------------------------------------------
+def credentials_configured?
+  if  File.exists?(Synaptic4r::Client.config_file)
+    config = File.open(Synaptic4r::Client.config_file){|yf| YAML::load(yf)}  
+    [:uid, :key, :site, :subtenant].select{|k| config.keys.include?(k.to_s)} == [:uid, :key, :site, :subtenant] 
+  else
+    false
+  end
+end
+
+####---------------------------------------------------------------------------------------------------------
+def set_args(opts, args, meth_args)
+  [meth_args].flatten.sort_by{|m| m.to_s}.each do |a|
+    arg_info = Synaptic4r::Request.rest_arg(a)
+    opts.on(arg_info[:cli].first, arg_info[:cli].last, arg_info[:desc]) do |v|
+      args[a] = arg_info[:map].nil? ? v : arg_info[:map][v]
+    end
+  end
+end
+
+####---------------------------------------------------------------------------------------------------------
+def dump(cmd, args, result)
+  <<-DUMP
+COMMAND: #{cmd}
+ARGS: #{args.inspect}
+SIGNING STRING: #{result.sign.inspect}
+HTTP METHOD: #{result.http_request}
+URL: #{result.url}
+HEADERS: #{result.headers.inspect}
+  DUMP
+end
+
+####---------------------------------------------------------------------------------------------------------
+def run(cmd, args)
+  begin
+    result = Synaptic4r::Client.new.send(cmd, args)
+    {:out => args[:dump] ? dump(cmd, args, result) : result.print, :logger => :info}
+  rescue RestClient::RequestFailed, RestClient::ResourceNotFound, RestClient::Unauthorized, 
+         RestClient::NotModified => err
+    {:out => "#{err.message}\n" + Synaptic4r::RequestError.new(err).print, :logger => :error}
+  rescue RestClient::Redirect, RestClient::ServerBrokeConnection, RestClient::RequestTimeout => err
+    {:out => err.message, :logger => :error}
+  rescue ArgumentError => err
+    {:out => err.to_s, :logger  => :error}
+  end
+end
+
+#############################################################################################################
+unless credentials_configured?
+  puts "#{Synaptic4r::Client.config_file} not found or does not include uid, key, subtenant or site"
+  exit
+end
+
+####---------------------------------------------------------------------------------------------------------
+meths = Synaptic4r::Request.rest_methods << :examples
+args = {}
+
+####---------------------------------------------------------------------------------------------------------
+cmd = if ARGV.first 
+        if meths.include?(ARGV.first.gsub(/-/,'_').to_sym)
+          ARGV.shift.gsub(/-/,'_').to_sym 
+        else
+          puts "Error: '#{ARGV.first}' is not a valid command"
+          nil
+        end
+      else
+        nil
+      end
+
+####---------------------------------------------------------------------------------------------------------
+if cmd.eql?(:examples)
+  examples
+  exit
+elsif cmd
+  OptionParser.new do |opts|
+    opts.banner = "Usage: syncli command args [options]"
+    opts.separator ""
+    req_args = Synaptic4r::Request.required_rest_args(cmd)
+    exc_args =  Synaptic4r::Request.exclusive_rest_args(cmd)
+    unless req_args.empty? and exc_args.empty?
+      opts.separator "args"
+      set_args(opts, args, req_args)
+      set_args(opts, args, exc_args)
+      opts.separator ""
+    end
+    opts.separator "options"
+    set_args(opts, args, Synaptic4r::Request.optional_rest_args(cmd))
+    opts.on('-u', '--dump', 'do not send request but print headers and service url'){|d| args[:dump] = d}
+    opts.on('-l', '--log [file]', 'log request to file (by default file is synaptic4r.log)') do |file|
+      args[:log] = true
+      args[:log_file] = file
+    end
+    opts.on_tail('-h', '--help', 'this listing') {
+      puts opts
+      exit
+    }
+    begin
+      opts.parse!(ARGV)
+    rescue OptionParser::MissingArgument, OptionParser::InvalidOption  => err
+      puts err.to_s
+      exit
+    end
+  end
+else
+  puts "Usage: synrest command args [options]" 
+  puts "\nCommands"
+  meths.sort_by{|m| m.to_s}.each do |m| 
+    next if m.eql?(:examples)
+    meth_str = " %-25s" % m.to_s.gsub(/_/,'-')
+    puts "#{meth_str} #{Synaptic4r::Request.desc(m)}"
+  end
+  puts "\nCommand args and options\n synrest command -h"
+  puts "\nCommand examples\n synrest examples"
+  exit
+end
+
+####---------------------------------------------------------------------------------------------------------
+if args[:log]
+  log = Logger.new(args[:log_file] || 'synaptic4r.log')
+  request = run(cmd, args.merge(:dump => true))
+end
+
+####---------------------------------------------------------------------------------------------------------
+result = run(cmd, args)
+puts result[:out] if result[:out]
+
+####---------------------------------------------------------------------------------------------------------
+log.send(result[:logger], "\n#{request[:out]}#{result[:out]}") if args[:log]
