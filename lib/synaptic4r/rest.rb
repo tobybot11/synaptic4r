@@ -25,13 +25,13 @@ module Synaptic4r
       if length.nil?
         fsize - offset
       else
-        length > fsize ? fize - offset : length 
+        length > (fsize - offset) ? fsize - offset : length 
       end
     end
 
     #.......................................................................................................
     def read_file(file, offset, length)
-      IO.read(file, get_partial_file_size(file, offset, length), offset)
+      IO.read(file, get_partial_file_size(file, offset, length), offset.to_i)
     end
 
   #### Utils
@@ -101,7 +101,6 @@ module Synaptic4r
       def rest_methods
         args.keys.inject([]){|r,m| m.eql?(:all) ? r : r.push(m)}
       end
-
       #.......................................................................................................
       def http_method(meth)
         args[meth][:http_method]
@@ -254,8 +253,10 @@ module Synaptic4r
         if args[:file]
           ext = extent(args)
           @payload = read_file(args[:file], ext[:offset], ext[:length])
-          headers['content-length'] = File.size(args[:file])
-          headers['content-md5'] = Base64.encode64(Digest::MD5.digest(payload)).chomp()
+          if @payload
+            headers['content-length'] = File.size(args[:file])
+            headers['content-md5'] = Base64.encode64(Digest::MD5.digest(payload)).chomp()
+          end
         end
       end
 
@@ -299,15 +300,15 @@ module Synaptic4r
       #.......................................................................................................
       def extent(args)
         if args[:file]
-          offset = args[:beginoffset] ||  0
+          offset = args[:beginoffset].to_i ||  0
           length = if args[:endoffset]
-                     get_partial_file_size(args[:file], offset, args[:endoffset])
+                     get_partial_file_size(args[:file], offset, args[:endoffset].to_i - offset + 1)
                    else
                      File.size(args[:file])
                    end
           if args[:beginoffset] or args[:endoffset]
             args[:beginoffset] = offset
-            args[:endoffset] = length
+            args[:endoffset] = length + offset
           end
           {:offset => offset, :length => length}
         end
