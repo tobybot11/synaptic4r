@@ -33,21 +33,28 @@ end
 
 ####---------------------------------------------------------------------------------------------------------
 def dump(cmd, args, result)
-  <<-DUMP
+  output = if args[:dump]
+             <<-DUMP
 COMMAND: #{cmd}
 ARGS: #{args.inspect}
 SIGNING STRING: #{result.sign.inspect}
 HTTP METHOD: #{result.http_request}
 URL: #{result.url}
 HEADERS: #{result.headers.inspect}
-  DUMP
+              DUMP
+           else; ''; end
+  if args[:payload] and result.payload
+    output + "PAYLOAD:\n" + result.payload
+  else
+    output
+  end
 end
 
 ####---------------------------------------------------------------------------------------------------------
 def run(cmd, args)
   begin
     result = Synaptic4r::Client.new.send(cmd, args)
-    {:out => args[:dump] ? dump(cmd, args, result) : result.print, :logger => :info}
+    {:out => (args[:dump] or args[:payload]) ? dump(cmd, args, result) : result.print, :logger => :info}
   rescue RestClient::RequestFailed, RestClient::ResourceNotFound, RestClient::Unauthorized, 
          RestClient::NotModified => err
     {:out => "#{err.message}\n" + Synaptic4r::RequestError.new(err).print, :logger => :error}
@@ -98,7 +105,8 @@ elsif cmd
     end
     opts.separator "options"
     set_args(opts, args, Synaptic4r::Request.optional_rest_args(cmd))
-    opts.on('-u', '--dump', 'do not send request but print headers and service url'){|d| args[:dump] = d}
+    opts.on('-u', '--dump', 'do not send request but print headers and service url'){|d| args[:dump] = true}
+    opts.on('-p', '--payload', 'do not send request print payload'){|p| args[:payload] = true}
     opts.on('-l', '--log [file]', 'log request to file (by default file is synaptic4r.log)') do |file|
       args[:log] = true
       args[:log_file] = file

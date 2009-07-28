@@ -11,52 +11,58 @@ module Synaptic4r
     #.......................................................................................................
     # argument specification
     #.......................................................................................................
-    define_rest_arg :uid,               :header => :none, :cli => ['-u', '--uid uid'], 
+    define_rest_arg :uid,                 :header => :none, :cli => ['-u', '--uid uid'], 
                     :desc => 'user ID'
 
-    define_rest_arg :key,               :header => :none, :cli => ['-k', '--key key'], 
+    define_rest_arg :key,                 :header => :none, :cli => ['-k', '--key key'], 
                     :desc => 'site generated secret key'
 
-    define_rest_arg :site,              :header => :none, :cli => ['-s', '--site site'], 
+    define_rest_arg :site,                :header => :none, :cli => ['-s', '--site site'], 
                     :desc => 'site url'
 
-    define_rest_arg :file,              :header => :none, :cli => ['-f', '--file file'], 
+    define_rest_arg :file,                :header => :none, :cli => ['-f', '--file file'], 
                     :desc => 'file to upload'
 
-    define_rest_arg :oid,               :header => :none, :cli => ['-o', '--oid oid'], 
+    define_rest_arg :oid,                 :header => :none, :cli => ['-o', '--oid oid'], 
                     :desc => 'object idetifier assigned by system'
 
-    define_rest_arg :rfile,             :header => :none, :cli => ['-r', '--remote-file [file]'], 
+    define_rest_arg :rfile,               :header => :none, :cli => ['-r', '--remote-file [file]'], 
                     :desc => 'name of file at remote location', :map => lambda{|v| v.nil? ? true : v}
 
-    define_rest_arg :namespace,         :header => :none, :cli => ['-n', '--namespace namespace'], 
+    define_rest_arg :namespace,           :header => :none, :cli => ['-n', '--namespace namespace'], 
                     :desc => 'remote root namespace (default is uid)'
 
-    define_rest_arg :content_type,      :header => :http, :cli => ['-c', '--content-type type'], 
+    define_rest_arg :create_begin_offset, :header => :none, :cli => ['-b', '--begin-offset begin'], 
+                    :desc => 'begining byte offset in file where upload'
+
+    define_rest_arg :create_end_offset,   :header => :none, :cli => ['-d', '--end-offest end'], 
+                    :desc => 'end byte offset in file where upload will terminate'
+
+    define_rest_arg :content_type,        :header => :http, :cli => ['-c', '--content-type type'], 
                     :desc => 'content type'
 
-    define_rest_arg :beginoffset,       :header => :http, :cli => ['-b', '--begin-offset begin'], 
-                    :desc => 'begining byte offset where update will append'
+    define_rest_arg :beginoffset,         :header => :http, :cli => ['-b', '--begin-offset begin'], 
+                    :desc => 'begining byte offset in file where update will begin'
 
-    define_rest_arg :endoffset,         :header => :http, :cli => ['-d', '--end-offest end'], 
-                    :desc => 'end byte offset where update will terminate'
+    define_rest_arg :endoffset,           :header => :http, :cli => ['-d', '--end-offest end'], 
+                    :desc => 'end byte offset in file where update will terminate'
 
-    define_rest_arg :useracl,           :header => :emc,  :cli => ['-a', '--user-acl acl'], 
+    define_rest_arg :useracl,             :header => :emc,  :cli => ['-a', '--user-acl acl'], 
                     :desc => 'access control list'
 
-    define_rest_arg :groupacl,          :header => :emc,  :cli => ['-g', '--group-acl acl'], 
+    define_rest_arg :groupacl,            :header => :emc,  :cli => ['-g', '--group-acl acl'], 
                     :desc => 'user group acess control list'
 
-    define_rest_arg :tags,              :header => :emc,  :cli => ['-t', '--tags tags'], 
+    define_rest_arg :tags,                :header => :emc,  :cli => ['-t', '--tags tags'], 
                     :desc => 'object tags'
 
-    define_rest_arg :include_meta,      :header => :emc,  :cli => ['-e', '--include-meta'], 
+    define_rest_arg :include_meta,        :header => :emc,  :cli => ['-e', '--include-meta'], 
                     :desc => 'include object metadata in query result', :map => lambda{|v| v ? 1 : 0}
 
-    define_rest_arg :meta,              :header => :emc,  :cli => ['-m', '--metadata metadata'], 
+    define_rest_arg :meta,                :header => :emc,  :cli => ['-m', '--metadata metadata'], 
                     :desc => 'user metadata name=value pairs'
 
-    define_rest_arg :listable_meta,     :header => :emc,  :cli => ['-i', '--listable-metadata metadata'], 
+    define_rest_arg :listable_meta,       :header => :emc,  :cli => ['-i', '--listable-metadata metadata'], 
                     :desc => 'user listable metadata name=value pairs'
                                                            
     #.......................................................................................................
@@ -73,7 +79,14 @@ module Synaptic4r
                        :result_class => StorageObject,
                        :http_method  => :post,
                        :required     => [[:rfile, :listable_meta]], 
-                       :optional     => [:useracl, :groupacl, :meta, :content_type, :namespace, :file]
+                       :optional     => [:useracl, :groupacl, :meta, :content_type, :namespace, :file, 
+                                         :create_begin_offset, :create_end_offset],
+                        :exe          => lambda {|req, args| 
+                                                 ext = req.extent(args[:file], args[:create_begin_offset], 
+                                                              args[:create_end_offset])
+                                                 req.add_payload(args, ext)}
+                                           
+
  
     define_rest_method :version, 
                        :desc          => 'create an immutable version of a file or directory',
@@ -171,7 +184,10 @@ module Synaptic4r
                        :required      => [[:rfile, :oid]], 
                        :optional      => [:useracl, :groupacl, :meta, :listable_meta, :content_type, 
                                           :namespace, :file, :beginoffset, :endoffset],
-                       :exe           => lambda{|req, args| req.set_header_range(args)}
+                       :exe           => lambda {|req, args| 
+                                                  ext = req.extent(args[:file], args[:beginoffset], args[:endoffset])
+                                                  req.set_header_range(args, ext)
+                                                  req.add_payload(args, ext)}
 
     #### DELETE    
     define_rest_method :delete, 

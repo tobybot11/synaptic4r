@@ -20,18 +20,8 @@ module Synaptic4r
     end
 
     #.......................................................................................................
-    def get_partial_file_size(file, offset, length=nil)
-      fsize = File.size(file)
-      if length.nil?
-        fsize - offset
-      else
-        length > (fsize - offset) ? fsize - offset : length 
-      end
-    end
-
-    #.......................................................................................................
     def read_file(file, offset, length)
-      IO.read(file, get_partial_file_size(file, offset, length), offset.to_i)
+      IO.read(file, length, offset)
     end
 
   #### Utils
@@ -148,7 +138,8 @@ module Synaptic4r
 
       #.......................................................................................................
       def header_args(meth)
-        required_rest_args(meth) + exclusive_rest_args(meth).flatten + optional_rest_args(meth) - non_header_args(meth)
+        required_rest_args(meth) + exclusive_rest_args(meth).flatten + optional_rest_args(meth) - 
+          non_header_args(meth)
       end
 
       #.......................................................................................................
@@ -190,15 +181,17 @@ module Synaptic4r
         set_remote_file(args)
         exclusive_args_given?(self.class.exclusive_rest_args(meth), args)
         required_args_given?(self.class.required_rest_args(meth), args)
+        self.class.exe(meth)[self, args] if self.class.exe(meth)
         build_service_url(args)
         add_header_attr(args)
-        add_payload(args)
-        self.class.exe(meth)[self, args] if self.class.exe(meth)
         create_signature
-        res = args[:dump] ? nil : RestClient::Request.execute(:method => self.class.http_method(meth),  
-                                                              :url => site, :headers => headers, :payload => payload)
+        res = if args[:dump].nil? and args[:payload].nil?                
+                RestClient::Request.execute(:method => self.class.http_method(meth), :url => site, 
+                                            :headers => headers, :payload => payload)
+              else; nil; end
         self.class.result_class(meth).new(:result => res, :headers => headers, :url => site, :sign => sign,
-                                          :http_request => self.class.http_method(meth))
+                                          :http_request => self.class.http_method(meth), 
+                                          :payload => args[:payload] ? payload : nil)
       end
 
       #.......................................................................................................
@@ -240,24 +233,7 @@ module Synaptic4r
                  'objects' + (args[:oid].nil? ? '' : "/#{args[:oid]}")
                end
         @site = (/\/$/.match(site).nil? ? site + '/' : site) + surl + 
-                ((q = self.class.query(meth)).nil? ? '' : "?#{q}")
-      end
-
-      #.......................................................................................................
-      def add_header_tags(val=nil)
-        headers['x-emc-tags'] = val.join(",") if val
-      end    
-
-      #.......................................................................................................
-      def add_payload(args={})
-        if args[:file]
-          ext = extent(args)
-          @payload = read_file(args[:file], ext[:offset], ext[:length])
-          if @payload
-            headers['content-length'] = File.size(args[:file])
-            headers['content-md5'] = Base64.encode64(Digest::MD5.digest(payload)).chomp()
-          end
-        end
+          ((q = self.class.query(meth)).nil? ? '' : "?#{q}")
       end
 
       #.......................................................................................................
@@ -290,27 +266,43 @@ module Synaptic4r
       end
 
       #.......................................................................................................
-      def set_header_range(args)
+      def set_header_range(args, ext)
         if args[:file]
-          ext = extent(args)
           headers['range'] = "bytes=#{ext[:offset]}-#{ext[:offset]+ext[:length]-1}"
         end
       end
 
+
       #.......................................................................................................
-      def extent(args)
+      def set_header_extent(args, ext)
         if args[:file]
-          offset = args[:beginoffset].to_i ||  0
-          length = if args[:endoffset]
-                     get_partial_file_size(args[:file], offset, args[:endoffset].to_i - offset + 1)
-                   else
-                     File.size(args[:file])
-                   end
           if args[:beginoffset] or args[:endoffset]
             args[:beginoffset] = offset
             args[:endoffset] = length + offset
           end
+        end
+      end
+
+      #.......................................................................................................
+      def extent(file, begin_offset, end_offset)
+        if file
+          file_offset = File.size(file) - 1
+          offset =  begin_offset.to_i
+          end_offset = end_offset.nil? ? file_offset : end_offset.to_i 
+          end_offset = file_offset if end_offset > file_offset
+          length = end_offset - offset + 1
           {:offset => offset, :length => length}
+        end
+      end
+
+      #.......................................................................................................
+      def add_payload(args, ext)
+        if args[:file]
+          @payload = read_file(args[:file], ext[:offset], ext[:length])
+          if @payload
+            headers['content-length'] = ext[:length]
+            headers['content-md5'] = Base64.encode64(Digest::MD5.digest(payload)).chomp()
+          end
         end
       end
 

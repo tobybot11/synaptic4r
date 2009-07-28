@@ -5,7 +5,7 @@ module Synaptic4r
   class Result
 
     #.......................................................................................................
-    attr_reader :headers, :url, :http_request, :sign
+    attr_reader :headers, :url, :http_request, :sign, :payload
 
     #.......................................................................................................
     def initialize(args)
@@ -13,6 +13,7 @@ module Synaptic4r
       @headers = args[:headers]
       @url = args[:url]
       @sign =  args[:sign]
+      @payload = args[:payload]
     end
 
     #.......................................................................................................
