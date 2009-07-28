@@ -33,19 +33,19 @@ module Synaptic4r
                     :desc => 'remote root namespace (default is uid)'
 
     define_rest_arg :create_begin_offset, :header => :none, :cli => ['-b', '--begin-offset begin'], 
-                    :desc => 'begining byte offset in file where upload'
+                    :desc => 'begining byte offset in file'
 
-    define_rest_arg :create_end_offset,   :header => :none, :cli => ['-d', '--end-offest end'], 
-                    :desc => 'end byte offset in file where upload will terminate'
+    define_rest_arg :create_end_offset,   :header => :none, :cli => ['-d', '--end-offset end'], 
+                    :desc => 'end byte offset in file'
 
     define_rest_arg :content_type,        :header => :http, :cli => ['-c', '--content-type type'], 
                     :desc => 'content type'
 
     define_rest_arg :beginoffset,         :header => :http, :cli => ['-b', '--begin-offset begin'], 
-                    :desc => 'begining byte offset in file where update will begin'
+                    :desc => 'begining byte offset in file'
 
-    define_rest_arg :endoffset,           :header => :http, :cli => ['-d', '--end-offest end'], 
-                    :desc => 'end byte offset in file where update will terminate'
+    define_rest_arg :endoffset,           :header => :http, :cli => ['-d', '--end-offset end'], 
+                    :desc => 'end byte offset in file'
 
     define_rest_arg :useracl,             :header => :emc,  :cli => ['-a', '--user-acl acl'], 
                     :desc => 'access control list'
@@ -185,9 +185,10 @@ module Synaptic4r
                        :optional      => [:useracl, :groupacl, :meta, :listable_meta, :content_type, 
                                           :namespace, :file, :beginoffset, :endoffset],
                        :exe           => lambda {|req, args| 
-                                                  ext = req.extent(args[:file], args[:beginoffset], args[:endoffset])
-                                                  req.set_header_range(args, ext)
-                                                  req.add_payload(args, ext)}
+                                                 ext = req.extent(args[:file], args[:beginoffset], args[:endoffset])
+                                                 req.set_header_range(args, ext)
+                                                 req.add_payload(args, ext)
+                                                 req.set_header_extent(args, ext)}
 
     #### DELETE    
     define_rest_method :delete, 

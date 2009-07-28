@@ -105,6 +105,7 @@ elsif cmd
     end
     opts.separator "options"
     set_args(opts, args, Synaptic4r::Request.optional_rest_args(cmd))
+    opts.separator "diagnostic options"
     opts.on('-u', '--dump', 'do not send request but print headers and service url'){|d| args[:dump] = true}
     opts.on('-p', '--payload', 'do not send request print payload'){|p| args[:payload] = true}
     opts.on('-l', '--log [file]', 'log request to file (by default file is synaptic4r.log)') do |file|

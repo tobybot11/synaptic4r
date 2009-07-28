@@ -272,17 +272,6 @@ module Synaptic4r
         end
       end
 
-
-      #.......................................................................................................
-      def set_header_extent(args, ext)
-        if args[:file]
-          if args[:beginoffset] or args[:endoffset]
-            args[:beginoffset] = offset
-            args[:endoffset] = length + offset
-          end
-        end
-      end
-
       #.......................................................................................................
       def extent(file, begin_offset, end_offset)
         if file
@@ -292,6 +281,14 @@ module Synaptic4r
           end_offset = file_offset if end_offset > file_offset
           length = end_offset - offset + 1
           {:offset => offset, :length => length}
+        end
+      end
+
+      #.......................................................................................................
+      def set_header_extent(args, ext)
+        if args[:file]
+          args[:beginoffset] = ext[:offset]
+          args[:endoffset] = ext[:offset] + ext[:length] - 1 
         end
       end
 
