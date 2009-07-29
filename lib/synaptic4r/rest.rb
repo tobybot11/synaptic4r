@@ -97,6 +97,11 @@ module Synaptic4r
       end
 
       #.......................................................................................................
+      def all_required_rest_args(meth)
+        args[meth][:required]
+      end
+
+      #.......................................................................................................
       def required_rest_args(meth)
         args[meth][:required].inject([]){|r,a| a.kind_of?(Array) ?  r : r << a}
       end
@@ -215,20 +220,20 @@ module Synaptic4r
 
       #.......................................................................................................
       def set_remote_file(args)
-        if args[:rfile]
-          rfile = args[:rfile] == true ? '' : args[:rfile]
+        if args[:robj]
+          robj = args[:robj] == true ? '' : args[:robj]
           if args[:namespace]
-            args[:rfile] = args[:namespace] + '/' + rfile
+            args[:robj] = args[:namespace] + '/' + robj
           else
-            args[:rfile] = uid + '/' + rfile
+            args[:robj] = uid + '/' + robj
           end
         end
       end
 
       #.......................................................................................................
       def build_service_url(args={})
-        surl = if args[:rfile]
-                 'namespace/' + args[:rfile]
+        surl = if args[:robj]
+                 'namespace/' + args[:robj]
                else
                  'objects' + (args[:oid].nil? ? '' : "/#{args[:oid]}")
                end

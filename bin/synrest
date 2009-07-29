@@ -8,16 +8,19 @@ $:.unshift(SYNLIB) unless $:.include?(SYNLIB)
 require 'optparse'
 require 'synaptic4r'
 require 'logger'
-require "#{File.dirname($0)}/examples"
+require "#{File.dirname($0)}/help"
 
 #############################################################################################################
 ####---------------------------------------------------------------------------------------------------------
 def credentials_configured?
-  if  File.exists?(Synaptic4r::Client.config_file)
-    config = File.open(Synaptic4r::Client.config_file){|yf| YAML::load(yf)}  
-    [:uid, :key, :site, :subtenant].select{|k| config.keys.include?(k.to_s)} == [:uid, :key, :site, :subtenant] 
-  else
-    false
+  config_keys = [:uid, :key, :site, :subtenant]
+  status = if File.exists?(Synaptic4r::Client.config_file)
+             config = File.open(Synaptic4r::Client.config_file){|yf| YAML::load(yf)}  
+             config_keys.select{|k| config.keys.include?(k.to_s)} == config_keys
+           else; false; end
+  unless status
+    puts "#{Synaptic4r::Client.config_file} not found or does not include uid, key, subtenant or site"
+    exit
   end
 end
 
@@ -65,27 +68,94 @@ def run(cmd, args)
   end
 end
 
-#############################################################################################################
-unless credentials_configured?
-  puts "#{Synaptic4r::Client.config_file} not found or does not include uid, key, subtenant or site"
-  exit
+####---------------------------------------------------------------------------------------------------------
+def optional_args(opts, args, cmd)
+  opts.separator "\noptions"
+  set_args(opts, args, Synaptic4r::Request.optional_rest_args(cmd))
+  opts.separator "\ndiagnostic options"
+  opts.on('-u', '--dump', 'do not send request but print headers and service url'){|d| args[:dump] = true}
+  opts.on('-y', '--payload', 'do not send request print payload if present'){|p| args[:payload] = true}
+  opts.on('-l', '--log [file]', 'log request to file (by default file is synaptic4r.log)') do |file|
+    args[:log] = true
+    args[:log_file] = file
+  end
+  opts.on_tail('-h', '--help', "this listing\n") {
+    puts opts
+    puts "Examples: synrest #{cmd.to_s.gsub(/_/,'-')} examples\n\n"
+    exit
+  }
+end
+
+####---------------------------------------------------------------------------------------------------------
+def required_args(opts, args, cmd)
+  req_args = Synaptic4r::Request.required_rest_args(cmd)
+  exc_args = Synaptic4r::Request.exclusive_rest_args(cmd)
+  all_args = Synaptic4r::Request.all_required_rest_args(cmd)
+  unless req_args.empty? and exc_args.empty?
+    opts.separator "\nargs"
+    meth_str = " %-30s" % m.to_s.gsub(/_/,'-')
+    puts "#{meth_str} #{Synaptic4r::Request.desc(m)}"
+    set_args(opts, args, req_args)
+    set_args(opts, args, exc_args)
+  end
+end
+
+####---------------------------------------------------------------------------------------------------------
+def cmd_help(meths) 
+  puts "\nUsage: synrest command args [options]" 
+  puts "\nCommands"
+  meths.sort_by{|m| m.to_s}.each do |m| 
+    next if m.eql?(:examples)
+    meth_str = " %-30s" % m.to_s.gsub(/_/,'-')
+    puts "#{meth_str} #{Synaptic4r::Request.desc(m)}"
+  end
+  puts "\nCommand args and options\n synrest command -h"
+  puts "\nGet Started\n synrest get-started"
+  puts "\nCommand examples\n synrest command examples\n\n"
+end
+
+####---------------------------------------------------------------------------------------------------------
+def build_banner(opts, cmd)
+  opts.banner = "\nUsage: syncli #{cmd.to_s.gsub(/_/,'-')} args [options]"
+end
+
+####---------------------------------------------------------------------------------------------------------
+def extract_cmd(meths)
+  if ARGV.first 
+    if meths.include?(ARGV.first.gsub(/-/,'_').to_sym)
+      ARGV.shift.gsub(/-/,'_').to_sym 
+    else
+      puts "\nError: '#{ARGV.first}' is not a valid command"
+      cmd_help(meths)
+      exit
+    end
+  end
+end
+
+####---------------------------------------------------------------------------------------------------------
+def format_required_args(args)
+  args.inject("") do |f,a|
+    (f + (a.kind_of?(Array) ? a.map{|v| v.to_s}.join('|') : a.to_s)) + ', '  
+  end.chomp(', ')
+end
+
+####---------------------------------------------------------------------------------------------------------
+def extract_positional_args(meths, cmd)
+  exp_args = Synaptic4r::Request.all_required_rest_args(cmd)
+  exp_length = exp_args.length
+  pargs = ARGV.slice!(0, exp_length)
+  unless pargs.eql?(exp_length)
+    puts "\nError: expecting args '#{format_required_args(exp_args)}'"
+    exit
+  end
+  pargs
 end
 
 ####---------------------------------------------------------------------------------------------------------
 meths = Synaptic4r::Request.rest_methods << :examples
 args = {}
-
-####---------------------------------------------------------------------------------------------------------
-cmd = if ARGV.first 
-        if meths.include?(ARGV.first.gsub(/-/,'_').to_sym)
-          ARGV.shift.gsub(/-/,'_').to_sym 
-        else
-          puts "Error: '#{ARGV.first}' is not a valid command"
-          nil
-        end
-      else
-        nil
-      end
+cmd = extract_cmd(meths)
+positonal_args = extract_positional_args(meths, cmd)
 
 ####---------------------------------------------------------------------------------------------------------
 if cmd.eql?(:examples)
@@ -93,46 +163,21 @@ if cmd.eql?(:examples)
   exit
 elsif cmd
   OptionParser.new do |opts|
-    opts.banner = "Usage: syncli command args [options]"
-    opts.separator ""
-    req_args = Synaptic4r::Request.required_rest_args(cmd)
-    exc_args =  Synaptic4r::Request.exclusive_rest_args(cmd)
-    unless req_args.empty? and exc_args.empty?
-      opts.separator "args"
-      set_args(opts, args, req_args)
-      set_args(opts, args, exc_args)
-      opts.separator ""
-    end
-    opts.separator "options"
-    set_args(opts, args, Synaptic4r::Request.optional_rest_args(cmd))
-    opts.separator "diagnostic options"
-    opts.on('-u', '--dump', 'do not send request but print headers and service url'){|d| args[:dump] = true}
-    opts.on('-p', '--payload', 'do not send request print payload'){|p| args[:payload] = true}
-    opts.on('-l', '--log [file]', 'log request to file (by default file is synaptic4r.log)') do |file|
-      args[:log] = true
-      args[:log_file] = file
-    end
-    opts.on_tail('-h', '--help', 'this listing') {
-      puts opts
-      exit
-    }
+    build_banner(opts, cmd)
+    required_args(opts, args, cmd)
+    optional_args(opts, args, cmd)
     begin
       opts.parse!(ARGV)
+      credentials_configured?
     rescue OptionParser::MissingArgument, OptionParser::InvalidOption  => err
       puts err.to_s
       exit
     end
   end
 else
-  puts "Usage: synrest command args [options]" 
-  puts "\nCommands"
-  meths.sort_by{|m| m.to_s}.each do |m| 
-    next if m.eql?(:examples)
-    meth_str = " %-25s" % m.to_s.gsub(/_/,'-')
-    puts "#{meth_str} #{Synaptic4r::Request.desc(m)}"
-  end
-  puts "\nCommand args and options\n synrest command -h"
-  puts "\nCommand examples\n synrest examples"
+  puts "\nsynrest provides a command line interface that maps directly onto the"
+  puts "synaptic storage rest API"
+  cmd_help(meths)
   exit
 end
 

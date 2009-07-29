@@ -26,11 +26,11 @@ module Synaptic4r
     define_rest_arg :oid,                 :header => :none, :cli => ['-o', '--oid oid'], 
                     :desc => 'object idetifier assigned by system'
 
-    define_rest_arg :rfile,               :header => :none, :cli => ['-r', '--remote-file [file]'], 
-                    :desc => 'name of file at remote location', :map => lambda{|v| v.nil? ? true : v}
+    define_rest_arg :robj,                :header => :none, :cli => ['-r', '--remote-object [obj]'], 
+                    :desc => 'name of file or directory at remote location', :map => lambda{|v| v.nil? ? true : v}
 
     define_rest_arg :namespace,           :header => :none, :cli => ['-n', '--namespace namespace'], 
-                    :desc => 'remote root namespace (default is uid)'
+                    :desc => 'root namespace used for remote file path (default is uid)'
 
     define_rest_arg :create_begin_offset, :header => :none, :cli => ['-b', '--begin-offset begin'], 
                     :desc => 'begining byte offset in file'
@@ -39,7 +39,7 @@ module Synaptic4r
                     :desc => 'end byte offset in file'
 
     define_rest_arg :content_type,        :header => :http, :cli => ['-c', '--content-type type'], 
-                    :desc => 'content type'
+                    :desc => 'http content type'
 
     define_rest_arg :beginoffset,         :header => :http, :cli => ['-b', '--begin-offset begin'], 
                     :desc => 'begining byte offset in file'
@@ -59,10 +59,10 @@ module Synaptic4r
     define_rest_arg :include_meta,        :header => :emc,  :cli => ['-e', '--include-meta'], 
                     :desc => 'include object metadata in query result', :map => lambda{|v| v ? 1 : 0}
 
-    define_rest_arg :meta,                :header => :emc,  :cli => ['-m', '--metadata metadata'], 
-                    :desc => 'user metadata name=value pairs'
+    define_rest_arg :meta,                :header => :emc,  :cli => ['-m', '--metadata meta'], 
+                    :desc => 'user nonlistable metadata name=value pairs'
 
-    define_rest_arg :listable_meta,       :header => :emc,  :cli => ['-i', '--listable-metadata metadata'], 
+    define_rest_arg :listable_meta,       :header => :emc,  :cli => ['-i', '--listable-metadata meta'], 
                     :desc => 'user listable metadata name=value pairs'
                                                            
     #.......................................................................................................
@@ -74,55 +74,67 @@ module Synaptic4r
                        :optional => []
 
     #### POST
-    define_rest_method :create, 
-                       :desc         => 'create a file or directory',
+    define_rest_method :create_file, 
+                       :desc         => 'create a file',
                        :result_class => StorageObject,
                        :http_method  => :post,
-                       :required     => [[:rfile, :listable_meta]], 
-                       :optional     => [:useracl, :groupacl, :meta, :content_type, :namespace, :file, 
+                       :required     => [:file, [:robj, :listable_meta]], 
+                       :optional     => [:useracl, :groupacl, :meta, :content_type, :namespace, 
                                          :create_begin_offset, :create_end_offset],
-                        :exe          => lambda {|req, args| 
+                       :exe          => lambda {|req, args| 
                                                  ext = req.extent(args[:file], args[:create_begin_offset], 
                                                               args[:create_end_offset])
                                                  req.add_payload(args, ext)}
-                                           
+    define_rest_method :create_dir, 
+                       :desc         => 'create a directory',
+                       :result_class => StorageObject,
+                       :http_method  => :post,
+                       :required     => [:robj], 
+                       :optional     => [:useracl, :groupacl, :meta, :listable_meta, :namespace],
+                       :exe          => lambda {|req, args| args[:robj] += '/'}                                           
 
- 
-    define_rest_method :version, 
+    define_rest_method :create_version, 
                        :desc          => 'create an immutable version of a file or directory',
                        :result_class  => StorageObject,
                        :http_method   => :post,
-                       :required      => [[:rfile, :oid]], 
+                       :required      => [[:robj, :oid]], 
                        :optional      => [:namespace],
                        :query         => 'versions'
     
-    define_rest_method :metadata, 
-                       :desc          => 'configure metadata for a file or directory',
+    define_rest_method :update_nonlistable_metadata, 
+                       :desc          => 'update nonlistable user metadata for a file or directory',
                        :http_method   => :post,
                        :result_class  => Result,
-                       :required      => [[:rfile, :oid], [:meta, :listable_meta]], 
-                       :optional      => [],
+                       :required      => [[:robj, :oid], :meta], 
+                       :optional      => [:namespace],
                        :query         => 'metadata/user'
 
-    define_rest_method :acl, 
-                       :desc          => 'configure access control list for a file or directory',
+    define_rest_method :update_listable_metadata, 
+                       :desc          => 'update listable user metadata for a file or directory',
                        :http_method   => :post,
                        :result_class  => Result,
+                       :required      => [[:robj, :oid], :listable_meta], 
                        :optional      => [:namespace],
-                       :required      => [[:rfile, :oid]], 
+                       :query         => 'metadata/user'
+
+    define_rest_method :update_acl, 
+                       :desc          => 'update access control list for a file or directory',
+                       :http_method   => :post,
+                       :result_class  => Result,
+                       :required      => [[:robj, :oid]], 
                        :optional      => [:namespace],
                        :query         => 'acl'
 
     #### GET
-    define_rest_method :read, 
-                       :desc          => 'read a file or directory',
+    define_rest_method :list, 
+                       :desc          => 'list the contents of a file or directory',
                        :result_class  => Download,
                        :http_method   => :get,
-                       :required      => [[:rfile, :oid]], 
+                       :required      => [[:robj, :oid]], 
                        :optional      => [:namespace]
 
     define_rest_method :list_by_tag, 
-                       :desc          => 'list files and directories with specified tag',
+                       :desc          => 'list files and directories with specified listable user metadata tag',
                        :result_class  => StorageObjectList,
                        :http_method   => :get,
                        :required      => [:tags], 
@@ -132,7 +144,7 @@ module Synaptic4r
                        :desc          => 'list user metadata for a file or directory',
                        :result_class  => UserMetadata,
                        :http_method   => :get,
-                       :required      => [[:rfile, :oid]], 
+                       :required      => [[:robj, :oid]], 
                        :optional      => [:namespace],
                        :query         => 'metadata/user'
 
@@ -140,7 +152,7 @@ module Synaptic4r
                        :desc          => 'list system metadata for a file or directory',
                        :http_method   => :get,
                        :result_class  => SystemMetadata,
-                       :required      => [[:rfile, :oid]], 
+                       :required      => [[:robj, :oid]], 
                        :optional      => [:namespace],
                        :query         => 'metadata/system'
 
@@ -148,15 +160,15 @@ module Synaptic4r
                        :desc          => 'list user and group access control list for a file or directory',
                        :result_class  => Acl,
                        :http_method   => :get,
-                       :required      => [[:rfile, :oid]], 
+                       :required      => [[:robj, :oid]], 
                        :optional      => [:namespace],
                        :query         => 'acl'
 
     define_rest_method :list_versions, 
-                       :desc          => 'list versions of a file por directory',
+                       :desc          => 'list versions of a file or directory',
                        :http_method   => :get,
                        :result_class  => Versions,
-                       :required      => [[:rfile, :oid]], 
+                       :required      => [[:robj, :oid]], 
                        :optional      => [:namespace],
                        :query         => 'versions'
 
@@ -169,10 +181,10 @@ module Synaptic4r
                        :query         => 'listabletags'
 
     define_rest_method :list_tags, 
-                       :desc          => 'list tags for a file or directory',
+                       :desc          => 'list listable user metadata tags for a file or directory',
                        :http_method   => :get,
                        :result_class  => Tags,
-                       :required      => [[:rfile, :oid]], 
+                       :required      => [[:robj, :oid]], 
                        :optional      => [:namespace],
                        :query         => 'metadata/tags'
 
@@ -181,7 +193,7 @@ module Synaptic4r
                        :desc          => 'update a file or directory',
                        :http_method   => :put,
                        :result_class  => Result,
-                       :required      => [[:rfile, :oid]], 
+                       :required      => [[:robj, :oid]], 
                        :optional      => [:useracl, :groupacl, :meta, :listable_meta, :content_type, 
                                           :namespace, :file, :beginoffset, :endoffset],
                        :exe           => lambda {|req, args| 
@@ -195,14 +207,14 @@ module Synaptic4r
                        :desc          => 'delete a file or directory',
                        :result_class  => Result,
                        :http_method   => :delete,
-                       :required      => [[:rfile, :oid]], 
+                       :required      => [[:robj, :oid]], 
                        :optional      => [:namespace]
     
     define_rest_method :delete_user_metadata, 
                        :desc          => 'delete user metadata for a file or directory',
                        :result_class  => Result,
                        :http_method   => :delete,
-                       :required      => [[:rfile, :oid], :tags], 
+                       :required      => [[:robj, :oid], :tags], 
                        :optional      => [:namespace]
 
   
