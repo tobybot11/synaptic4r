@@ -13,13 +13,13 @@ Examples
 
  - write a file to remote storage site      
 
-     synrest write -f file.txt
+     synrest create -f file.txt
      OID:      4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
      uploaded: 3695 bytes
 
  - write a file to remote storage site and specify a remote file name      
 
-     synrest write -f file.txt -r file.txt
+     synrest create -f file.txt -r file.txt
 
  - retrieve file by OID (Object Identifier)
 
@@ -39,27 +39,27 @@ Examples
 
  - retrieve user metadata by OID
 
-     synrest user-metadata -o 4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
+     synrest list-user-metadata -o 4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
 
    by remote file name
 
-     synrest user-metadata -r file.txt
+     synrest list-user-metadata -r file.txt
 
  - retrieve system metadata by OID
 
-     synrest system-metadata -o 4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
+     synrest list-system-metadata -o 4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
 
    by remote file name
 
-     synrest system-metadata -r file.txt
+     synrest list-system-metadata -r file.txt
 
  - retrieve access control list by OID
 
-     synrest acl -o 4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
+     synrest list-acl -o 4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
 
    by remote file name
 
-     synrest acl -r file.txt
+     synrest list-acl -r file.txt
 
  - create an immutable copy of an object by OID
 

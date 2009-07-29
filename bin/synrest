@@ -5,6 +5,7 @@ SYNLIB = "#{File.dirname($0)}/../lib"
 $:.unshift(SYNLIB) unless $:.include?(SYNLIB)
 
 ####---------------------------------------------------------------------------------------------------------
+require 'yaml'
 require 'optparse'
 require 'synaptic4r'
 require 'logger'
