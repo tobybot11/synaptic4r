@@ -141,7 +141,7 @@ module Synaptic4r
                        :optional      => [:include_meta]
 
     define_rest_method :list_user_metadata, 
-                       :desc          => 'list user metadata for a file or directory',
+                       :desc          => 'list both listable and nonlistable user metadata for a file or directory',
                        :result_class  => UserMetadata,
                        :http_method   => :get,
                        :required      => [[:robj, :oid]], 
