@@ -203,7 +203,7 @@ module Synaptic4r
       def exclusive_args_given?(exclusive_args, args)
         exclusive_args.each do |alist| 
           unless alist.select{|a| args.keys.include?(a)}.length.eql?(1)
-            raise ArgumentError, "One of '#{alist.join(', ')}' is required as an argument."
+            raise ArgumentError, "One of '#{alist.map{|a| a.to_s.gsub(/_/,'-')}.join(', ')}' is required as an argument."
           end
         end
       end
@@ -220,20 +220,20 @@ module Synaptic4r
 
       #.......................................................................................................
       def set_remote_file(args)
-        if args[:robj]
-          robj = args[:robj] == true ? '' : args[:robj]
+        if args[:rpath]
+          rpath = args[:rpath] == true ? '' : args[:rpath]
           if args[:namespace]
-            args[:robj] = args[:namespace] + '/' + robj
+            args[:rpath] = args[:namespace] + '/' + rpath
           else
-            args[:robj] = uid + '/' + robj
+            args[:rpath] = uid + '/' + rpath
           end
         end
       end
 
       #.......................................................................................................
       def build_service_url(args={})
-        surl = if args[:robj]
-                 'namespace/' + args[:robj]
+        surl = if args[:rpath]
+                 'namespace/' + args[:rpath]
                else
                  'objects' + (args[:oid].nil? ? '' : "/#{args[:oid]}")
                end
