@@ -73,68 +73,18 @@ end
 
 ####---------------------------------------------------------------------------------------------------------
 def format_required_args(args)
-  arg_name = lambda{|a| Synaptic4r::Request.rest_arg(a)[:cli_arg].first}
   args.inject("") do |f,a|
-    (f + (a.kind_of?(Array) ? a.map{|v| arg_name[v]}.join('|') : arg_name[a])) + ' '  
+    aname = lambda{|v,l| arg_name(Synaptic4r::Request.rest_arg(v),l)}
+    if a.kind_of?(Array)
+      f + [aname[a.first,false],a[1..-1].map{|v| aname[v,true]}].join('|') + ' '  
+    else
+      "#{f}#{aname[a, false]} "  
+    end
   end.chomp(' ')
 end
 
 ####---------------------------------------------------------------------------------------------------------
-def set_opts(opts, input, meth_args)
-  [meth_args].flatten.sort_by{|m| m.to_s}.each do |a|
-    arg_info = Synaptic4r::Request.rest_arg(a)
-    opts.on(arg_info[:cli_opt].first, arg_info[:cli_opt].last, arg_info[:desc]) do |v|
-      input[a] = arg_info[:map].nil? ? v : arg_info[:map][v]
-    end
-  end
-end
-
-####---------------------------------------------------------------------------------------------------------
-def extract_positional_args(meths, cmd)
-  exp_args = Synaptic4r::Request.all_required_rest_args(cmd)
-  exp_length = exp_args.length
-  pargs = ARGV.first(exp_length)
-  if pargs.include?('-h')
-  elsif pargs.length < exp_length
-    puts "Error: expecting args '#{format_required_args(exp_args)}'"
-    exit
-  else
-    ARGV.slice!(0, exp_length)
-  end
-end
-
-####---------------------------------------------------------------------------------------------------------
-def args(opts, meths, input, cmd)
-  pos_args = extract_positional_args(meths, cmd)
-  all_args = Synaptic4r::Request.all_required_rest_args(cmd)
-  fmt = "    %-32s %s"
-  unless all_args.empty?
-    opts.separator "\nargs"
-    args_desc = lambda{|a| arg_info = Synaptic4r::Request.rest_arg(a)
-                           opts.separator fmt % [arg_info[:cli_arg], arg_info[:desc]]}
-    all_args.each do |a|
-      if a.kind_of?(Array)
-        opts.separator "one of"
-        a.each{|e| args_desc[e]}
-      else
-        args_desc[a]
-      end
-    end
-  end
-end
-
-####---------------------------------------------------------------------------------------------------------
-def build_banner(opts, cmd)
-  exp_args = Synaptic4r::Request.all_required_rest_args(cmd)
-  opts.banner = "\nUsage: synrest #{cmd.to_s.gsub(/_/,'-')} #{format_required_args(exp_args)} [options]"
-end
-
-####---------------------------------------------------------------------------------------------------------
-def process_input(opts, meths, input, cmd)
-  build_banner(opts, cmd)
-  args(opts, meths, input, cmd)
-  opts.separator "\noptions"
-  set_opts(opts, input, Synaptic4r::Request.optional_rest_args(cmd))
+def diagnostic_args(opts, input, cmd)
   opts.separator "\ndiagnostic options"
   opts.on('-u', '--dump', 'do not send request but print headers and service url'){|d| input[:dump] = true}
   opts.on('-y', '--payload', 'do not send request print payload if present'){|p| input[:payload] = true}
@@ -148,6 +98,101 @@ def process_input(opts, meths, input, cmd)
     puts "Examples: synrest #{cmd.to_s.gsub(/_/,'-')} examples\n\n"
     exit
   }
+end
+
+####---------------------------------------------------------------------------------------------------------
+def set_opts(opts, input, opt_args)
+  opt_args = [opt_args].flatten
+  unless opt_args.empty?
+    opts.separator "\noptions"
+    opt_args.sort_by{|m| m.to_s}.each do |a|
+      arg_info = Synaptic4r::Request.rest_arg(a)
+      sopt = arg_info[:cli][1]
+      lopt = "--#{arg_info[:cli][0]}" + (arg_info[:cli][2].eql?(:flag) ? '' : " #{arg_info[:cli][0]}")
+      opts.on(sopt, lopt, arg_info[:desc]) do |v|
+        input[a] = arg_info[:map].nil? ? v : arg_info[:map][v]
+      end
+    end
+  end
+end
+
+####---------------------------------------------------------------------------------------------------------
+def set_args(opts, meths, input, cmd)
+  pos_args = extract_positional_args(meths, cmd)
+  all_args = Synaptic4r::Request.all_required_rest_args(cmd)
+  fmt = "    %-32s %s"
+  unless all_args.empty?
+    opts.separator "\nargs"
+    arg_row = lambda{|a,l| arg_info = Synaptic4r::Request.rest_arg(a)
+                           opts.separator fmt % [arg_name(arg_info,l), arg_info[:desc]]}
+    all_args.each do |a|
+      if a.kind_of?(Array)
+        opts.separator "one of"
+        arg_row[a.first,false]
+        a[1..-1].each{|e| arg_row[e,true]}
+      else
+        arg_row[a,false]
+      end
+    end
+  end
+end
+
+####---------------------------------------------------------------------------------------------------------
+def prep_argv
+  add = true
+  inargs = ARGV.inject([]) do |o,a|
+    if /^-/.match(a)
+      i = ARGV.index(a)
+      n = ARGV[i+1]
+      if n and not /^-/.match(n)
+        add = false;  o << [a,n].join(' ')
+      else
+        o << a
+      end
+    elsif add
+      o << a
+    else
+      add = true; o
+    end
+  end
+end
+
+####---------------------------------------------------------------------------------------------------------
+def extract_positional_args(meths, cmd)
+  exp_args = Synaptic4r::Request.all_required_rest_args(cmd)
+  exp_length = exp_args.length
+  inargs = prep_argv
+  pargs = inargs.first(exp_length)
+p pargs
+  if pargs.include?('-h')
+  elsif pargs.length < exp_length
+    puts "Error: expecting args '#{format_required_args(exp_args)}'"
+    exit
+  else
+    ARGV.slice!(0, exp_length)
+  end
+end
+
+####---------------------------------------------------------------------------------------------------------
+def arg_name(arg_info, long=true)
+  cli = arg_info[:cli]
+  if cli.kind_of?(Array) and long
+    cli.length > 1 ? "#{cli[1]} #{cli[0]}" : cli.first
+  else; [cli].flatten.first; end
+end
+
+####---------------------------------------------------------------------------------------------------------
+def build_banner(opts, cmd)
+  exp_args = Synaptic4r::Request.all_required_rest_args(cmd)
+  opts.banner = "\nUsage: synrest #{cmd.to_s.gsub(/_/,'-')} #{format_required_args(exp_args)} [options]"
+end
+
+####---------------------------------------------------------------------------------------------------------
+def process_input(opts, meths, input, cmd)
+  build_banner(opts, cmd)
+  set_args(opts, meths, input, cmd)
+  set_opts(opts, input, Synaptic4r::Request.optional_rest_args(cmd))
+  diagnostic_args(opts, input, cmd)
 end
 
 

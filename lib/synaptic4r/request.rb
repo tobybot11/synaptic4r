@@ -17,50 +17,44 @@ module Synaptic4r
 
     define_rest_arg :site,                :header => :none
 
-    define_rest_arg :file,                :header => :none, :cli_arg => 'file', 
+    define_rest_arg :file,                :header => :none, :cli => 'file', 
                     :desc => 'file to upload'
 
-    define_rest_arg :oid,                 :header => :none, :cli_arg => '-o oid', 
+    define_rest_arg :oid,                 :header => :none, :cli => ['oid', '-o'], 
                     :desc => 'system assigned object identifier'
 
-    define_rest_arg :rpath,               :header => :none, :cli_arg => 'remote-path', 
+    define_rest_arg :rpath,               :header => :none, :cli => 'remote-path', 
                     :desc => 'remote file or directory path', :map => lambda{|v| v.nil? ? true : v}
 
-    define_rest_arg :namespace,           :header => :none, :cli_opt => ['-n', '--namespace namespace'], 
+    define_rest_arg :namespace,           :header => :none, :cli => ['namespace', '-n'], 
                     :desc => 'root namespace used for remote file path (default is uid)'
 
-    define_rest_arg :create_begin_offset, :header => :none, :cli_opt => ['-b', '--begin-offset begin'], 
-                    :desc => 'begining byte offset in file'
-
-    define_rest_arg :create_end_offset,   :header => :none, :cli_opt => ['-d', '--end-offset end'], 
-                    :desc => 'end byte offset in file'
-
-    define_rest_arg :content_type,        :header => :http, :cli_opt => ['-c', '--content-type type'], 
+    define_rest_arg :content_type,        :header => :http, :cli => ['content-type', '-c'], 
                     :desc => 'http content type'
 
-    define_rest_arg :beginoffset,         :header => :http, :cli_opt => ['-b', '--begin-offset begin'], 
+    define_rest_arg :beginoffset,         :header => :http, :cli => ['begin-offset', '-b'], 
                     :desc => 'begining byte offset in file'
 
-    define_rest_arg :endoffset,           :header => :http, :cli_opt => ['-d', '--end-offset end'], 
+    define_rest_arg :endoffset,           :header => :http, :cli => ['end-offset', '-d'], 
                     :desc => 'end byte offset in file'
 
-    define_rest_arg :useracl,             :header => :emc,  :cli_opt => ['-a', '--user-acl acl'], 
+    define_rest_arg :useracl,             :header => :emc,  :cli => ['user-acl', '-a'], 
                     :desc => 'access control list'
 
-    define_rest_arg :groupacl,            :header => :emc,  :cli_opt => ['-g', '--group-acl acl'], 
+    define_rest_arg :groupacl,            :header => :emc,  :cli => ['group-acl', '-g'], 
                     :desc => 'user group acess control list'
 
-    define_rest_arg :tags,                :header => :emc,  :cli_opt => ['-t', '--tags tags'], 
-                    :desc => 'object tags'
+    define_rest_arg :tags,                :header => :emc,  :cli => ['tags', '-t'], 
+                    :desc => 'listable metadata tag names'
 
-    define_rest_arg :include_meta,        :header => :emc,  :cli_opt => ['-e', '--include-meta'], 
+    define_rest_arg :include_meta,        :header => :emc,  :cli => ['include-meta', '-e', :flag], 
                     :desc => 'include object metadata in query result', :map => lambda{|v| v ? 1 : 0}
 
-    define_rest_arg :meta,                :header => :emc,  :cli_opt => ['-m', '--metadata metadata'], 
+    define_rest_arg :meta,                :header => :emc,  :cli => ['metadata', '-m'], 
                     :desc => 'user nonlistable metadata name=value pairs'
 
-    define_rest_arg :listable_meta,       :header => :emc,  :cli_opt => ['-i', '--listable-metadata metadata'], 
-                    :cli_arg => '-i listable-metadata', :desc => 'user listable metadata name=value pairs'
+    define_rest_arg :listable_meta,       :header => :emc,  :cli => ['tags', '-t'], 
+                    :desc => 'user listable metadata tag name=value pairs'
                                                            
     #.......................................................................................................
     # method specification
@@ -76,8 +70,7 @@ module Synaptic4r
                        :result_class => StorageObject,
                        :http_method  => :post,
                        :required     => [:file, [:rpath, :listable_meta]], 
-                       :optional     => [:useracl, :groupacl, :meta, :content_type, :namespace, 
-                                         :create_begin_offset, :create_end_offset],
+                       :optional     => [:useracl, :groupacl, :meta, :content_type, :namespace],
                        :exe          => lambda {|req, args| 
                                                  ext = req.extent(args[:file], args[:create_begin_offset], 
                                                               args[:create_end_offset])
@@ -118,7 +111,7 @@ module Synaptic4r
                        :desc          => 'update access control list for a file or directory',
                        :http_method   => :post,
                        :result_class  => Result,
-                       :required      => [[:rpath, :oid]], 
+                       :required      => [[:useracl, :groupacl], [:rpath, :oid]], 
                        :optional      => [:namespace],
                        :query         => 'acl'
 
@@ -190,9 +183,8 @@ module Synaptic4r
                        :desc          => 'update a file or directory',
                        :http_method   => :put,
                        :result_class  => Result,
-                       :required      => [[:rpath, :oid]], 
-                       :optional      => [:useracl, :groupacl, :meta, :listable_meta, :content_type, 
-                                          :namespace, :file, :beginoffset, :endoffset],
+                       :required      => [:file, [:rpath, :oid]], 
+                       :optional      => [:namespace, :beginoffset, :endoffset],
                        :exe           => lambda {|req, args| 
                                                  ext = req.extent(args[:file], args[:beginoffset], args[:endoffset])
                                                  req.set_header_range(args, ext)

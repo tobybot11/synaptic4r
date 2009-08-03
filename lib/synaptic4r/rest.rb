@@ -203,7 +203,8 @@ module Synaptic4r
       def exclusive_args_given?(exclusive_args, args)
         exclusive_args.each do |alist| 
           unless alist.select{|a| args.keys.include?(a)}.length.eql?(1)
-            raise ArgumentError, "One of '#{alist.map{|a| a.to_s.gsub(/_/,'-')}.join(', ')}' is required as an argument."
+            acli = alist.map{|a| [self.class.rest_arg(a)[:cli]].flatten.first}
+            raise ArgumentError, "One of '#{acli.join(', ')}' is required as an argument."
           end
         end
       end
