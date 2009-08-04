@@ -2,81 +2,39 @@
 def get_started
   puts <<-EXAMP
 
-Create $HOME/.synaptic4r
+Get Started
 
- subtenant: SubtenantID 
- uid:       UserID
- key:       SecretKey
- site:      https://storage.synaptic.att.com/rest
+Save credentials to $HOME/.synaptic4r
 
-Examples
+  subtenant: SubtenantID 
+  uid:       UserID
+  key:       SecretKey
+  site:      https://storage.synaptic.att.com/rest
 
- - write a file to remote storage site      
+Commands
 
-     synrest create -f file.txt
-     OID:      4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
-     uploaded: 3695 bytes
+ - create a remote directory named foo    
 
- - write a file to remote storage site and specify a remote file name      
+     synrest create-dir foo
 
-     synrest create -f file.txt -r file.txt
+ - list contents remote root directory    
 
- - retrieve file by OID (Object Identifier)
+     synrest get
 
-     synrest read -o 4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
+ - upload a file to directory foo    
 
-   by remote file name
-
-     synrest read -r file.txt
-
- - delete file by OID
-
-     synrest delete -o 4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
-
-   by remote file name
-
-     synrest delete -r file.txt
-
- - retrieve user metadata by OID
-
-     synrest list-user-metadata -o 4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
-
-   by remote file name
-
-     synrest list-user-metadata -r file.txt
-
- - retrieve system metadata by OID
-
-     synrest list-system-metadata -o 4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
-
-   by remote file name
-
-     synrest list-system-metadata -r file.txt
-
- - retrieve access control list by OID
-
-     synrest list-acl -o 4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
-
-   by remote file name
-
-     synrest list-acl -r file.txt
-
- - create an immutable copy of an object by OID
-
-     synrest version -o 4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
-
-   by remote file name
-
-     synrest version -r file.txt
-
- - list OIDs of all versions of an object by OID
-
-     synrest list-versions -o 4a08bf2ead1f2e1904a4cd0bd62f9604a5f7932b8e02
-
-   by remote file name
-
-     synrest list-versions -r file.txt
+     synrest create-file file.txt foo/file.text
 
 EXAMP
 end
 
+####---------------------------------------------------------------------------------------------------------
+def create_file_examples
+  puts <<-EXAMP
+
+ - upload a file to directory foo    
+
+     synrest create-file file.txt foo/file.text
+
+EXAMP
+end

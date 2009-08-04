@@ -24,7 +24,7 @@ module Synaptic4r
                     :desc => 'system assigned object identifier'
 
     define_rest_arg :rpath,               :header => :none, :cli => 'remote-path', 
-                    :desc => 'remote file or directory path', :map => lambda{|v| v.nil? ? true : v}
+                    :desc => 'remote file or directory path'
 
     define_rest_arg :namespace,           :header => :none, :cli => ['namespace', '-n'], 
                     :desc => 'root namespace used for remote file path (default is uid)'
@@ -53,7 +53,7 @@ module Synaptic4r
     define_rest_arg :meta,                :header => :emc,  :cli => ['metadata', '-m'], 
                     :desc => 'user nonlistable metadata name=value pairs'
 
-    define_rest_arg :listable_meta,       :header => :emc,  :cli => ['tags', '-t'], 
+    define_rest_arg :listable_meta,       :header => :emc,  :cli => ['list-metadata', '-i'], 
                     :desc => 'user listable metadata tag name=value pairs'
                                                            
     #.......................................................................................................

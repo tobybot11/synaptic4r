@@ -184,8 +184,8 @@ module Synaptic4r
         @meth = meth
         args = args.first || {}
         set_remote_file(args)
-        exclusive_args_given?(self.class.exclusive_rest_args(meth), args)
         required_args_given?(self.class.required_rest_args(meth), args)
+        exclusive_args_given?(self.class.exclusive_rest_args(meth), args)
         self.class.exe(meth)[self, args] if self.class.exe(meth)
         build_service_url(args)
         add_header_attr(args)
@@ -222,11 +222,10 @@ module Synaptic4r
       #.......................................................................................................
       def set_remote_file(args)
         if args[:rpath]
-          rpath = args[:rpath] == true ? '' : args[:rpath]
           if args[:namespace]
-            args[:rpath] = args[:namespace] + '/' + rpath
+            args[:rpath] = args[:namespace] + '/' + args[:rpath]
           else
-            args[:rpath] = uid + '/' + rpath
+            args[:rpath] = uid + '/' + args[:rpath]
           end
         end
       end
