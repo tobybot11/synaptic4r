@@ -161,8 +161,12 @@ end
 def extract_positional_args(meths, input, cmd)
   eargs = Synaptic4r::Request.required_rest_args(cmd)
   elength = eargs.length
-  pvals = prep_argv.first(elength)
-  pvals = Synaptic4r::Request.map_required_args(cmd)[pvals] if Synaptic4r::Request.map_required_args(cmd)
+  pvals= prep_argv.first(elength)
+  nvals = if Synaptic4r::Request.map_required_args(cmd)
+            Synaptic4r::Request.map_required_args(cmd)[pvals]
+          else 
+            {:pvals => pvals, :dlen => 0}
+          end
   if pvals.include?('-h')
   elsif pvals.first.eql?('examples')
     begin
@@ -172,21 +176,21 @@ def extract_positional_args(meths, input, cmd)
       puts "'#{cmd.to_s.gsub(/_/,'-')}' examples are not availble"
       exit
     end
-  elsif pvals.length < elength
+  elsif nvals[:pvals].length < elength
     puts "Error: expecting args '#{format_required_args(eargs)}'"
     exit
   else
-    set_positional_args(input, pvals, eargs)
+    set_positional_args(input, nvals, eargs)
   end
 end
 
 ####---------------------------------------------------------------------------------------------------------
-def set_positional_args(input, pvals, eargs)
+def set_positional_args(input, nvals, eargs)
   assign_input = lambda{|a,v| info = Synaptic4r::Request.rest_arg(a); 
                               input[a] = info[:map].nil? ? v : info[:map][v]}
   length = 0
-  pvals.each_index do |i|
-    pv = pvals[i]
+  nvals[:pvals].each_index do |i|
+    pv = nvals[:pvals][i]
     ea = eargs[i]
     if ea.kind_of?(Array)
       if /^-/.match(pv)
@@ -203,7 +207,7 @@ def set_positional_args(input, pvals, eargs)
           end
         end
         unless matched
-          puts "Error: expecting args '#{format_required_args(exp_args)}'"
+          puts "Error: expecting args '#{format_required_args(eargs)}'"
           exit
         end
       else
@@ -215,7 +219,7 @@ def set_positional_args(input, pvals, eargs)
       assign_input[ea,pv]
     end
   end
-  ARGV.slice!(0, length)
+  ARGV.slice!(0, length - nvals[:dlen])
 end
 
 ####---------------------------------------------------------------------------------------------------------

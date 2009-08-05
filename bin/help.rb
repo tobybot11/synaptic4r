@@ -11,7 +11,7 @@ Save credentials to $HOME/.synaptic4r
   key:       SecretKey
   site:      https://storage.synaptic.att.com/rest
 
-Commands
+Basic Commands
 
  - create a remote directory named foo    
 

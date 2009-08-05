@@ -66,15 +66,26 @@ module Synaptic4r
 
     #### POST
     define_rest_method :create_file, 
-                       :desc             => 'create a file',
-                       :result_class     => StorageObject,
-                       :http_method      => :post,
-                       :required         => [:file, [:rpath, :listable_meta]], 
-                       :optional         => [:useracl, :groupacl, :meta, :content_type, :namespace],
-                       :exe              => lambda {|req, args| 
+                       :desc              => 'create a file',
+                       :result_class      => StorageObject,
+                       :http_method       => :post,
+                       :required          => [:file, [:rpath, :listable_meta]], 
+                       :optional          => [:useracl, :groupacl, :meta, :content_type, :namespace],
+                       :exe               => lambda {|req, args| 
                                                     ext = req.extent(args[:file], args[:create_begin_offset], 
                                                               args[:create_end_offset])
-                                                    req.add_payload(args, ext)}
+                                                    req.add_payload(args, ext)},
+                       :map_required_args => lambda {|vals|
+                                                     pvals = vals.select{|v| /^-i/.match(v) or not /^-/.match(v)}
+                                                     ovals = if pvals.length.eql?(1)
+                                                               pvals + [pvals.first] 
+                                                             elsif /\/$/.match(pvals.last) and pvals.length.eql?(2)
+                                                               [pvals.first, pvals.last+pvals.first]
+                                                             else
+                                                               pvals
+                                                             end
+                                                     {:pvals => ovals, :dlen => ovals.length - pvals.length}}
+
     define_rest_method :create_dir, 
                        :desc              => 'create a directory',
                        :result_class      => StorageObject,
@@ -122,7 +133,13 @@ module Synaptic4r
                        :http_method       => :get,
                        :required          => [[:rpath, :oid]], 
                        :optional          => [:namespace],
-                       :map_required_args => lambda {|vals| vals << '' if vals.empty?}
+                       :map_required_args => lambda {|vals| 
+                                                      pvals = vals.select{|v| /^-o/.match(v) or not /^-/.match(v)}
+                                                      if pvals.empty?
+                                                        {:pvals => [''], :dlen => 1}
+                                                      else
+                                                        {:pvals => pvals, :dlen => 0}
+                                                      end}
 
     define_rest_method :get_by_tag, 
                        :desc              => 'get files and directories with specified listable user metadata tag',
