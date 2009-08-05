@@ -66,145 +66,146 @@ module Synaptic4r
 
     #### POST
     define_rest_method :create_file, 
-                       :desc         => 'create a file',
-                       :result_class => StorageObject,
-                       :http_method  => :post,
-                       :required     => [:file, [:rpath, :listable_meta]], 
-                       :optional     => [:useracl, :groupacl, :meta, :content_type, :namespace],
-                       :exe          => lambda {|req, args| 
-                                                 ext = req.extent(args[:file], args[:create_begin_offset], 
+                       :desc             => 'create a file',
+                       :result_class     => StorageObject,
+                       :http_method      => :post,
+                       :required         => [:file, [:rpath, :listable_meta]], 
+                       :optional         => [:useracl, :groupacl, :meta, :content_type, :namespace],
+                       :exe              => lambda {|req, args| 
+                                                    ext = req.extent(args[:file], args[:create_begin_offset], 
                                                               args[:create_end_offset])
-                                                 req.add_payload(args, ext)}
+                                                    req.add_payload(args, ext)}
     define_rest_method :create_dir, 
-                       :desc         => 'create a directory',
-                       :result_class => StorageObject,
-                       :http_method  => :post,
-                       :required     => [:rpath], 
-                       :optional     => [:useracl, :groupacl, :meta, :listable_meta, :namespace],
-                       :exe          => lambda {|req, args| args[:rpath] += '/'}                                           
+                       :desc              => 'create a directory',
+                       :result_class      => StorageObject,
+                       :http_method       => :post,
+                       :required          => [:rpath], 
+                       :optional          => [:useracl, :groupacl, :meta, :listable_meta, :namespace],
+                       :exe               => lambda {|req, args| args[:rpath] += '/'}                                           
 
     define_rest_method :create_version, 
-                       :desc          => 'create an immutable version of a file or directory',
-                       :result_class  => StorageObject,
-                       :http_method   => :post,
-                       :required      => [[:rpath, :oid]], 
-                       :optional      => [:namespace],
-                       :query         => 'versions'
+                       :desc              => 'create an immutable version of a file or directory',
+                       :result_class      => StorageObject,
+                       :http_method       => :post,
+                       :required          => [[:rpath, :oid]], 
+                       :optional          => [:namespace],
+                       :query             => 'versions'
     
     define_rest_method :update_nonlistable_metadata, 
-                       :desc          => 'update nonlistable user metadata for a file or directory',
-                       :http_method   => :post,
-                       :result_class  => Result,
-                       :required      => [[:rpath, :oid], :meta], 
-                       :optional      => [:namespace],
-                       :query         => 'metadata/user'
+                       :desc              => 'update nonlistable user metadata for a file or directory',
+                       :http_method       => :post,
+                       :result_class      => Result,
+                       :required          => [[:rpath, :oid], :meta], 
+                       :optional          => [:namespace],
+                       :query             => 'metadata/user'
 
     define_rest_method :update_listable_metadata, 
-                       :desc          => 'update listable user metadata for a file or directory',
-                       :http_method   => :post,
-                       :result_class  => Result,
-                       :required      => [[:rpath, :oid], :listable_meta], 
-                       :optional      => [:namespace],
-                       :query         => 'metadata/user'
+                       :desc              => 'update listable user metadata for a file or directory',
+                       :http_method       => :post,
+                       :result_class      => Result,
+                       :required          => [[:rpath, :oid], :listable_meta], 
+                       :optional          => [:namespace],
+                       :query             => 'metadata/user'
 
     define_rest_method :update_acl, 
-                       :desc          => 'update access control list for a file or directory',
-                       :http_method   => :post,
-                       :result_class  => Result,
-                       :required      => [[:useracl, :groupacl], [:rpath, :oid]], 
-                       :optional      => [:namespace],
-                       :query         => 'acl'
+                       :desc              => 'update access control list for a file or directory',
+                       :http_method       => :post,
+                       :result_class      => Result,
+                       :required          => [[:useracl, :groupacl], [:rpath, :oid]], 
+                       :optional          => [:namespace],
+                       :query             => 'acl'
 
     #### GET
     define_rest_method :get, 
-                       :desc          => 'get the contents of a file or directory',
-                       :result_class  => Download,
-                       :http_method   => :get,
-                       :required      => [[:rpath, :oid]], 
-                       :optional      => [:namespace]
+                       :desc              => 'get the contents of a file or directory',
+                       :result_class      => Download,
+                       :http_method       => :get,
+                       :required          => [[:rpath, :oid]], 
+                       :optional          => [:namespace],
+                       :map_required_args => lambda {|vals| vals << '' if vals.empty?}
 
     define_rest_method :get_by_tag, 
-                       :desc          => 'get files and directories with specified listable user metadata tag',
-                       :result_class  => StorageObjectList,
-                       :http_method   => :get,
-                       :required      => [:tags], 
-                       :optional      => [:include_meta]
+                       :desc              => 'get files and directories with specified listable user metadata tag',
+                       :result_class      => StorageObjectList,
+                       :http_method       => :get,
+                       :required          => [:tags], 
+                       :optional          => [:include_meta]
 
     define_rest_method :get_user_metadata, 
-                       :desc          => 'get both listable and nonlistable user metadata for a file or directory',
-                       :result_class  => UserMetadata,
-                       :http_method   => :get,
-                       :required      => [[:rpath, :oid]], 
-                       :optional      => [:namespace],
-                       :query         => 'metadata/user'
+                       :desc              => 'get both listable and nonlistable user metadata for a file or directory',
+                       :result_class      => UserMetadata,
+                       :http_method       => :get,
+                       :required          => [[:rpath, :oid]], 
+                       :optional          => [:namespace],
+                       :query             => 'metadata/user'
 
     define_rest_method :get_system_metadata, 
-                       :desc          => 'get system metadata for a file or directory',
-                       :http_method   => :get,
-                       :result_class  => SystemMetadata,
-                       :required      => [[:rpath, :oid]], 
-                       :optional      => [:namespace],
-                       :query         => 'metadata/system'
+                       :desc              => 'get system metadata for a file or directory',
+                       :http_method       => :get,
+                       :result_class      => SystemMetadata,
+                       :required          => [[:rpath, :oid]], 
+                       :optional          => [:namespace],
+                       :query             => 'metadata/system'
 
     define_rest_method :get_acl, 
-                       :desc          => 'get user and group access control list for a file or directory',
-                       :result_class  => Acl,
-                       :http_method   => :get,
-                       :required      => [[:rpath, :oid]], 
-                       :optional      => [:namespace],
-                       :query         => 'acl'
+                       :desc              => 'get user and group access control list for a file or directory',
+                       :result_class      => Acl,
+                       :http_method       => :get,
+                       :required          => [[:rpath, :oid]], 
+                       :optional          => [:namespace],
+                       :query             => 'acl'
 
     define_rest_method :get_versions, 
-                       :desc          => 'get versions of a file or directory',
-                       :http_method   => :get,
-                       :result_class  => Versions,
-                       :required      => [[:rpath, :oid]], 
-                       :optional      => [:namespace],
-                       :query         => 'versions'
+                       :desc              => 'get versions of a file or directory',
+                       :http_method       => :get,
+                       :result_class      => Versions,
+                       :required          => [[:rpath, :oid]], 
+                       :optional          => [:namespace],
+                       :query             => 'versions'
 
     define_rest_method :get_all_tags, 
-                       :desc          => 'get all defined tags',
-                       :http_method   => :get,
-                       :result_class  => Tags,
-                       :required      => [], 
-                       :optional      => [:namespace, :tags],
-                       :query         => 'listabletags'
+                       :desc              => 'get all defined tags',
+                       :http_method       => :get,
+                       :result_class      => Tags,
+                       :required          => [], 
+                       :optional          => [:namespace, :tags],
+                       :query             => 'listabletags'
 
     define_rest_method :get_tags, 
-                       :desc          => 'get listable user metadata tags for a file or directory',
-                       :http_method   => :get,
-                       :result_class  => Tags,
-                       :required      => [[:rpath, :oid]], 
-                       :optional      => [:namespace],
-                       :query         => 'metadata/tags'
+                       :desc              => 'get listable user metadata tags for a file or directory',
+                       :http_method       => :get,
+                       :result_class      => Tags,
+                       :required          => [[:rpath, :oid]], 
+                       :optional          => [:namespace],
+                       :query             => 'metadata/tags'
 
     #### PUT
     define_rest_method :update, 
-                       :desc          => 'update a file or directory',
-                       :http_method   => :put,
-                       :result_class  => Result,
-                       :required      => [:file, [:rpath, :oid]], 
-                       :optional      => [:namespace, :beginoffset, :endoffset],
-                       :exe           => lambda {|req, args| 
-                                                 ext = req.extent(args[:file], args[:beginoffset], args[:endoffset])
-                                                 req.set_header_range(args, ext)
-                                                 req.add_payload(args, ext)
-                                                 req.set_header_extent(args, ext)}
+                       :desc              => 'update a file or directory',
+                       :http_method       => :put,
+                       :result_class      => Result,
+                       :required          => [:file, [:rpath, :oid]], 
+                       :optional          => [:namespace, :beginoffset, :endoffset],
+                       :exe               => lambda {|req, args| 
+                                                     ext = req.extent(args[:file], args[:beginoffset], args[:endoffset])
+                                                     req.set_header_range(args, ext)
+                                                     req.add_payload(args, ext)
+                                                     req.set_header_extent(args, ext)}
 
     #### DELETE    
     define_rest_method :delete, 
-                       :desc          => 'delete a file or directory',
-                       :result_class  => Result,
-                       :http_method   => :delete,
-                       :required      => [[:rpath, :oid]], 
-                       :optional      => [:namespace]
+                       :desc              => 'delete a file or directory',
+                       :result_class      => Result,
+                       :http_method       => :delete,
+                       :required          => [[:rpath, :oid]], 
+                       :optional          => [:namespace]
     
     define_rest_method :delete_user_metadata, 
-                       :desc          => 'delete user metadata for a file or directory',
-                       :result_class  => Result,
-                       :http_method   => :delete,
-                       :required      => [[:rpath, :oid], :tags], 
-                       :optional      => [:namespace]
+                       :desc              => 'delete user metadata for a file or directory',
+                       :result_class      => Result,
+                       :http_method       => :delete,
+                       :required          => [[:rpath, :oid], :tags], 
+                       :optional          => [:namespace]
 
   
   #### Request

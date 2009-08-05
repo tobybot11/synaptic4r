@@ -22,7 +22,7 @@ module Synaptic4r
     #.........................................................................................................
     def initialize(args = nil)
       args ||= symbolize(File.open(Client.config_file){|yf| YAML::load(yf)})
-      required_args_given?([:uid, :key, :site, :subtenant], args)
+      unary_args_given?([:uid, :key, :site, :subtenant], args)
       @subtenant = args[:subtenant]
       @uid = args[:uid]
       @key = args[:key]

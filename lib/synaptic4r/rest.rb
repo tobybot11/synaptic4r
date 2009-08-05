@@ -5,8 +5,8 @@ module Synaptic4r
   module Utils
       
     #.......................................................................................................
-    def required_args_given?(required_args, args)
-      required_args.each{|a| raise ArgumentError, "Required argument '#{a}' is missing." unless args.include?(a)}
+    def unary_args_given?(unary_args, args)
+      unary_args.each{|a| raise ArgumentError, "Required argument '#{a}' is missing." unless args.include?(a)}
     end
     
     #.......................................................................................................
@@ -69,6 +69,7 @@ module Synaptic4r
           method_defs[m][:result_class] = args[:result_class]
           method_defs[m][:query] = args[:query]
           method_defs[m][:exe] = args[:exe]
+          method_defs[m][:map_required_args] = args[:map_required_args]
         end  
       end
 
@@ -97,12 +98,12 @@ module Synaptic4r
       end
 
       #.......................................................................................................
-      def all_required_rest_args(meth)
+      def required_rest_args(meth)
         args[meth][:required]
       end
 
       #.......................................................................................................
-      def required_rest_args(meth)
+      def unary_rest_args(meth)
         args[meth][:required].inject([]){|r,a| a.kind_of?(Array) ?  r : r << a}
       end
 
@@ -132,6 +133,11 @@ module Synaptic4r
       end
 
       #.......................................................................................................
+      def map_required_args(meth)
+        args[meth][:map_required_args]
+      end
+
+      #.......................................................................................................
       def result_class(meth)
         args[meth][:result_class]
       end
@@ -143,7 +149,7 @@ module Synaptic4r
 
       #.......................................................................................................
       def header_args(meth)
-        required_rest_args(meth) + exclusive_rest_args(meth).flatten + optional_rest_args(meth) - 
+        unary_rest_args(meth) + exclusive_rest_args(meth).flatten + optional_rest_args(meth) - 
           non_header_args(meth)
       end
 
@@ -171,7 +177,7 @@ module Synaptic4r
 
       #.......................................................................................................
       def initialize(args)
-        required_args_given?([:uid, :subtenant, :key, :site], args)
+        unary_args_given?([:uid, :subtenant, :key, :site], args)
         @uid = args[:uid]
         @key = args[:key]
         @site = args[:site]
@@ -184,7 +190,7 @@ module Synaptic4r
         @meth = meth
         args = args.first || {}
         set_remote_file(args)
-        required_args_given?(self.class.required_rest_args(meth), args)
+        unary_args_given?(self.class.unary_rest_args(meth), args)
         exclusive_args_given?(self.class.exclusive_rest_args(meth), args)
         self.class.exe(meth)[self, args] if self.class.exe(meth)
         build_service_url(args)

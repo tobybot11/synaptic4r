@@ -119,7 +119,7 @@ end
 ####---------------------------------------------------------------------------------------------------------
 def set_args(opts, meths, input, cmd)
   extract_positional_args(meths, input, cmd)
-  all_args = Synaptic4r::Request.all_required_rest_args(cmd)
+  all_args = Synaptic4r::Request.required_rest_args(cmd)
   fmt = "    %-32s %s"
   unless all_args.empty?
     opts.separator "\nargs"
@@ -159,9 +159,10 @@ end
 
 ####---------------------------------------------------------------------------------------------------------
 def extract_positional_args(meths, input, cmd)
-  eargs = Synaptic4r::Request.all_required_rest_args(cmd)
+  eargs = Synaptic4r::Request.required_rest_args(cmd)
   elength = eargs.length
   pvals = prep_argv.first(elength)
+  pvals = Synaptic4r::Request.map_required_args(cmd)[pvals] if Synaptic4r::Request.map_required_args(cmd)
   if pvals.include?('-h')
   elsif pvals.first.eql?('examples')
     begin
@@ -227,7 +228,7 @@ end
 
 ####---------------------------------------------------------------------------------------------------------
 def build_banner(opts, cmd)
-  exp_args = Synaptic4r::Request.all_required_rest_args(cmd)
+  exp_args = Synaptic4r::Request.required_rest_args(cmd)
   opts.banner = "\nUsage: synrest #{cmd.to_s.gsub(/_/,'-')} #{format_required_args(exp_args)} [options]"
 end
 
