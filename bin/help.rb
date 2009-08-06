@@ -4,7 +4,7 @@ def get_started
 
 Get Started
 
-Save credentials to $HOME/.synaptic4r
+Save credentials to #{ENV['HOME']}/.synaptic4r
 
   subtenant: SubtenantID 
   uid:       UserID

@@ -14,13 +14,14 @@ require "#{File.dirname($0)}/help"
 #############################################################################################################
 ####---------------------------------------------------------------------------------------------------------
 def credentials_configured?
-  config_keys = [:key, :site, :subtenant, :uid]
+  config_keys = %w(key site subtenant uid)
   status = if File.exists?(Synaptic4r::Client.config_file)
-             config = File.open(Synaptic4r::Client.config_file){|yf| YAML::load(yf)}  
-             config_keys.eql?(config.keys.sort.map{|k| k.to_sym})
+             config = File.open(Synaptic4r::Client.config_file){|yf| YAML::load(yf)}
+             if config.keys.sort.eql?(config_keys); true
+             elsif config.values.select{|c| c.keys.sort.eql?(config_keys)}.length.eql?(config.values.length); true; end
            else; false; end
   unless status
-    puts "#{Synaptic4r::Client.config_file} not found or does not include uid, key, subtenant or site"
+    puts "#{Synaptic4r::Client.config_file} not found or does not include one of uid, key, subtenant or site"
     exit
   end
 end
@@ -47,7 +48,8 @@ end
 ####---------------------------------------------------------------------------------------------------------
 def run(cmd, input)
   begin
-    result = Synaptic4r::Client.new.send(cmd, input)
+    
+    result = Synaptic4r::Client.new(input[:account].nil? ? nil : {:account => input[:account]}).send(cmd, input)
     {:out => (input[:dump] or input[:payload]) ? dump(cmd, input, result) : result.print, :logger => :info}
   rescue RestClient::RequestFailed, RestClient::ResourceNotFound, RestClient::Unauthorized, 
          RestClient::NotModified => err
@@ -86,8 +88,8 @@ end
 ####---------------------------------------------------------------------------------------------------------
 def diagnostic_args(opts, input, cmd)
   opts.separator "\ndiagnostic options"
-  opts.on('-u', '--dump', 'do not send request but print headers and service url'){|d| input[:dump] = true}
-  opts.on('-y', '--payload', 'do not send request print payload if present'){|p| input[:payload] = true}
+  opts.on('-q', '--dump', 'do not send request but print headers and service url'){|d| input[:dump] = true}
+  opts.on('-p', '--payload', 'do not send request print payload if present'){|p| input[:payload] = true}
   opts.on('-l', '--log [file]', 'log request to file (by default file is synaptic4r.log)') do |file|
     input[:log] = true
     input[:log_file] = file

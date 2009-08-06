@@ -11,14 +11,17 @@ module Synaptic4r
     #.......................................................................................................
     # argument specification
     #.......................................................................................................
-    define_rest_arg :uid,                 :header => :none
+    define_rest_arg :uid,                 :header => :hide
 
-    define_rest_arg :key,                 :header => :none
+    define_rest_arg :key,                 :header => :hide
 
-    define_rest_arg :site,                :header => :none
+    define_rest_arg :site,                :header => :hide
 
     define_rest_arg :file,                :header => :none, :cli => 'file', 
                     :desc => 'file to upload'
+
+    define_rest_arg :account,             :header => :none, :cli => ['account', '-u'], 
+                    :desc => "user account tag specified in #{ENV['HOME']}./synaptic4r"
 
     define_rest_arg :oid,                 :header => :none, :cli => ['oid', '-o'], 
                     :desc => 'system assigned object identifier'
@@ -62,7 +65,7 @@ module Synaptic4r
     #### all methods
     define_rest_method :all, 
                        :required => [:uid, :key, :site], 
-                       :optional => []
+                       :optional => [:account]
 
     #### POST
     define_rest_method :create_file, 

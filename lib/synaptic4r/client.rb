@@ -17,16 +17,32 @@ module Synaptic4r
     end
 
     #.........................................................................................................
-    attr_reader :uid, :key, :site, :resource, :subtenant
+    attr_reader :uid, :key, :site, :resource, :subtenant, :account
   
     #.........................................................................................................
     def initialize(args = nil)
-      args ||= symbolize(File.open(Client.config_file){|yf| YAML::load(yf)})
-      unary_args_given?([:uid, :key, :site, :subtenant], args)
+      config_params = %w(key site subtenant uid)
+      if args
+        if args[:account]
+          @account = args[:account]
+          raise ArgumentError, "Account '#{account}' not found in #{ENV['HOME']}/.synaptic4r" unless config[account]
+          args.update(symbolize(config[account]))
+        end
+      else
+        if config_params.eql?(config.keys.sort)
+          args = symbolize(config)
+        elsif config[config.keys.first].kind_of?(Hash) and config_params.eql?(config[config.keys.first].keys.sort)
+          @account = config.keys.first
+          args = symbolize(config[account])
+        else
+          raise ArgumentError, "#{ENV['HOME']}/.synaptic4r unreadable"
+        end
+      end
+      unary_args_given?(symbolize(config_params), args.keys)
       @subtenant = args[:subtenant]
       @uid = args[:uid]
       @key = args[:key]
-      @site = args[:site]      
+      @site = args[:site]
     end
 
     #.........................................................................................................
@@ -36,6 +52,13 @@ module Synaptic4r
       else
         super
       end
+    end
+
+  private
+
+    #.........................................................................................................
+    def config
+      @config ||= File.open(Client.config_file){|yf| YAML::load(yf)}
     end
 
   #### Client
