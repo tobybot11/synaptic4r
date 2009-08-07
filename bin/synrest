@@ -17,11 +17,21 @@ def credentials_configured?
   config_keys = %w(key site subtenant uid)
   status = if File.exists?(Synaptic4r::Client.config_file)
              config = File.open(Synaptic4r::Client.config_file){|yf| YAML::load(yf)}
-             if config.keys.sort.eql?(config_keys); true
-             elsif config.values.select{|c| c.keys.sort.eql?(config_keys)}.length.eql?(config.values.length); true; end
-           else; false; end
+             if config.kind_of?(Hash)
+               config.keys.sort.eql?(config_keys) or config.keys.sort.eql?(config_keys.unshift('account'))
+             elsif config.kind_of?(Array) 
+               config_keys.unshift('account')
+               config.select{|c| c.keys.sort.eql?(config_keys)}.length.eql?(config.length)
+             else
+               puts "#{Synaptic4r::Client.config_file} not formatted properly"
+               exit
+             end
+           else
+             puts "#{Synaptic4r::Client.config_file} not found"
+             exit
+           end
   unless status
-    puts "#{Synaptic4r::Client.config_file} not found or does not include one of uid, key, subtenant or site"
+    puts "#{Synaptic4r::Client.config_file} missing one of 'key', 'site', 'subtenant' or 'uid'"
     exit
   end
 end
@@ -47,8 +57,7 @@ end
 
 ####---------------------------------------------------------------------------------------------------------
 def run(cmd, input)
-  begin
-    
+  begin    
     result = Synaptic4r::Client.new(input[:account].nil? ? nil : {:account => input[:account]}).send(cmd, input)
     {:out => (input[:dump] or input[:payload]) ? dump(cmd, input, result) : result.print, :logger => :info}
   rescue RestClient::RequestFailed, RestClient::ResourceNotFound, RestClient::Unauthorized, 

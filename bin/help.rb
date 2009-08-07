@@ -6,10 +6,28 @@ Get Started
 
 Save credentials to #{ENV['HOME']}/.synaptic4r
 
-  subtenant: SubtenantID 
-  uid:       UserID
-  key:       SecretKey
-  site:      https://storage.synaptic.att.com/rest
+ - single account
+
+   subtenant: SubtenantID 
+   uid:       UserID
+   key:       SecretKey
+   site:      https://storage.synaptic.att.com/rest
+
+ - multiple accounts (the - must be included with 1 space indentation for data)
+
+   -
+    account:   myacct
+    subtenant: SubtenantID 
+    uid:       UserID
+    key:       SecretKey
+    site:      https://storage.synaptic.att.com/rest
+
+   -
+    account:   myotheracct
+    subtenant: OtherSubtenantID 
+    uid:       OtherUserID
+    key:       OtherSecretKey
+    site:      https://storage.synaptic.att.com/rest
 
 Basic Commands
 
@@ -25,6 +43,7 @@ Basic Commands
 
      synrest create-file file.txt foo/file.text
 
+Diag
 EXAMP
 end
 

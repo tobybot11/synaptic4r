@@ -53,10 +53,10 @@ module Synaptic4r
     define_rest_arg :include_meta,        :header => :emc,  :cli => ['include-meta', '-e', :flag], 
                     :desc => 'include object metadata in query result', :map => lambda{|v| v ? 1 : 0}
 
-    define_rest_arg :meta,                :header => :emc,  :cli => ['metadata', '-m'], 
+    define_rest_arg :meta,                :header => :emc,  :cli => ['meta', '-m'], 
                     :desc => 'user nonlistable metadata name=value pairs'
 
-    define_rest_arg :listable_meta,       :header => :emc,  :cli => ['list-metadata', '-i'], 
+    define_rest_arg :listable_meta,       :header => :emc,  :cli => ['list-meta', '-i'], 
                     :desc => 'user listable metadata tag name=value pairs'
                                                            
     #.......................................................................................................

@@ -17,25 +17,26 @@ module Synaptic4r
     end
 
     #.........................................................................................................
-    attr_reader :uid, :key, :site, :resource, :subtenant, :account
+    attr_reader :uid, :key, :site, :resource, :subtenant
   
     #.........................................................................................................
     def initialize(args = nil)
       config_params = %w(key site subtenant uid)
       if args
-        if args[:account]
-          @account = args[:account]
-          raise ArgumentError, "Account '#{account}' not found in #{ENV['HOME']}/.synaptic4r" unless config[account]
-          args.update(symbolize(config[account]))
+        account = args[:account]
+        if account
+          aconfig = config_by_account(account)
+          raise ArgumentError, "Account '#{account}' not found in #{ENV['HOME']}/.synaptic4r" unless aconfig
+          args.update(symbolize(aconfig))
         end
       else
-        if config_params.eql?(config.keys.sort)
+        if config.kind_of?(Hash)
           args = symbolize(config)
-        elsif config[config.keys.first].kind_of?(Hash) and config_params.eql?(config[config.keys.first].keys.sort)
-          @account = config.keys.first
-          args = symbolize(config[account])
+        elsif config.kind_of?(Array)
+          cfg = config.first
+          args = symbolize(cfg)
         else
-          raise ArgumentError, "#{ENV['HOME']}/.synaptic4r unreadable"
+          raise ArgumentError, "#{ENV['HOME']}/.synaptic4r not formatted properly"
         end
       end
       unary_args_given?(symbolize(config_params), args.keys)
@@ -59,6 +60,14 @@ module Synaptic4r
     #.........................................................................................................
     def config
       @config ||= File.open(Client.config_file){|yf| YAML::load(yf)}
+    end
+
+    #.........................................................................................................
+    def config_by_account(account)
+      if config.kind_of?(Array)
+        a = config.select{|c| c['account'].eql?(account)}.first
+        a.delete('account') unless a.nil?; a
+      else; config; end
     end
 
   #### Client
