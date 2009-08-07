@@ -21,7 +21,7 @@ module Synaptic4r
                     :desc => 'file to upload'
 
     define_rest_arg :account,             :header => :none, :cli => ['account', '-u'], 
-                    :desc => "user account tag specified in #{ENV['HOME']}./synaptic4r"
+                    :desc => "user account name specified in #{ENV['HOME']}./synaptic4r"
 
     define_rest_arg :oid,                 :header => :none, :cli => ['oid', '-o'], 
                     :desc => 'system assigned object identifier'
@@ -31,6 +31,12 @@ module Synaptic4r
 
     define_rest_arg :namespace,           :header => :none, :cli => ['namespace', '-n'], 
                     :desc => 'root namespace used for remote file path (default is uid)'
+
+    define_rest_arg :create_begin_offset, :header => :none, :cli => ['begin-offset', '-b'],
+                    :desc => 'begining byte offset in file'
+ 
+    define_rest_arg :create_end_offset, :header => :none,   :cli => ['end-offset', '-d'],
+                    :desc => 'end byte offset in file'
 
     define_rest_arg :content_type,        :header => :http, :cli => ['content-type', '-c'], 
                     :desc => 'http content type'
@@ -73,7 +79,7 @@ module Synaptic4r
                        :result_class      => StorageObject,
                        :http_method       => :post,
                        :required          => [:file, [:rpath, :listable_meta]], 
-                       :optional          => [:useracl, :groupacl, :meta, :content_type, :namespace],
+                       :optional          => [:content_type, :namespace, :create_begin_offset, :create_end_offset],
                        :exe               => lambda {|req, args| 
                                                     ext = req.extent(args[:file], args[:create_begin_offset], 
                                                               args[:create_end_offset])
@@ -83,7 +89,7 @@ module Synaptic4r
                                                      ovals = if pvals.length.eql?(1)
                                                                pvals + [pvals.first] 
                                                              elsif /\/$/.match(pvals.last) and pvals.length.eql?(2)
-                                                               [pvals.first, pvals.last+pvals.first]
+                                                               [pvals.first, pvals.last+File.basename(pvals.first)]
                                                              else
                                                                pvals
                                                              end
@@ -94,7 +100,7 @@ module Synaptic4r
                        :result_class      => StorageObject,
                        :http_method       => :post,
                        :required          => [:rpath], 
-                       :optional          => [:useracl, :groupacl, :meta, :listable_meta, :namespace],
+                       :optional          => [:namespace],
                        :exe               => lambda {|req, args| args[:rpath] += '/'}                                           
 
     define_rest_method :create_version, 

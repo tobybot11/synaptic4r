@@ -222,7 +222,7 @@ module Synaptic4r
     #.......................................................................................................
     def metadata(ols, tag)
       meta = ols.map{|o| o.elements.to_a(tag)}
-      meta.map{|a| a.first.elements.to_a.inject({}){|h,s| h.update(extract_attrs(s))}}
+      meta.map{|a| a.empty? ? nil : a.first.elements.to_a.inject({}){|h,s| h.update(extract_attrs(s))}}.compact
     end
 
     #.......................................................................................................
