@@ -73,6 +73,22 @@ EXAMP
 end
 
 ####---------------------------------------------------------------------------------------------------------
+def create_dir_examples
+  puts <<-EXAMP
+
+ - create a directory named foo  
+
+     synrest create-dir foo
+
+ - create directory foo/bar automatically creating 
+   directories if not present
+
+     synrest create-dir foo/bar
+
+EXAMP
+end
+
+####---------------------------------------------------------------------------------------------------------
 def create_file_examples
   puts <<-EXAMP
 
@@ -84,15 +100,15 @@ def create_file_examples
 
      synrest create-file file.txt otherfile.text
 
- - upload a file to directory foo and preserve name
+ - upload a file to directory and preserve name
 
      synrest create-file file.txt foo/
 
- - upload a file to directory foo and change name
+ - upload a file to directory and change name
 
      synrest create-file file.txt foo/otherfile.txt
 
- - upload a file to directory foo/bar automatically creating 
+ - upload a file to directory automatically creating 
    directories if not present
 
      synrest create-file foo/bar/file.txt
@@ -110,33 +126,74 @@ EXAMP
 end
 
 ####---------------------------------------------------------------------------------------------------------
-def create_dir_examples
+def get_examples
   puts <<-EXAMP
 
- - create a directory named foo  
+ - get remote root directory listing
 
-     synrest create-dir foo
+     synrest get
 
- - create directory foo/bar automatically creating 
-   directories if not present
+ - get remote directory listing by specifing directory name
+ 
+     synrest get foo
 
-     synrest create-dir foo/bar
+ - get remote directory listing by specifing OID
+
+     synrest get -o 4a08bf2ea11f1e0b04a08c4bb666a804a7c5d32a2c63 
+
+ - get file by remote file name
+
+     synrest get foo/file.txt
+
+ - get file by specifing OID
+
+     synrest get -o 4a08bf2ea11f1e0b04a6664b3866a804a7c60fb30b30
 
 EXAMP
 end
 
 ####---------------------------------------------------------------------------------------------------------
-def get_examples
+def get_acl_examples
   puts <<-EXAMP
 
- - create a directory named foo  
+ - get access control list by specifying remote file path  
 
-     synrest create-dir foo
+     synrest get-acl foo/file.txt
 
- - create directory foo/bar automatically creating 
-   directories if not present
+ - get access control list by specifying remote directory path  
 
-     synrest create-dir foo/bar
+     synrest get-acl foo
+
+ - get access control list by specifying OID
+   
+     synrest get-acl -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
 
 EXAMP
 end
+
+####---------------------------------------------------------------------------------------------------------
+def get_all_tags_examples
+  puts <<-EXAMP
+
+ - get all listable metadata tags used by account
+
+     synrest get-all-tags
+
+EXAMP
+end
+
+####---------------------------------------------------------------------------------------------------------
+def get_by_tag_examples
+  puts <<-EXAMP
+
+ - get all objects with specified listable metadata tag
+
+     synrest get-by-tag junk
+
+ - get all objects with specified listable metadata tag with extended output
+   
+     synrest get-by-tag junk -e
+
+EXAMP
+end
+

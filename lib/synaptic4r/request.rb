@@ -53,8 +53,8 @@ module Synaptic4r
     define_rest_arg :groupacl,            :header => :emc,  :cli => ['group-acl', '-g'], 
                     :desc => 'user group acess control list'
 
-    define_rest_arg :tags,                :header => :emc,  :cli => ['tags', '-t'], 
-                    :desc => 'listable metadata tag names'
+    define_rest_arg :tags,                :header => :emc,  :cli => ['tag', '-t'], 
+                    :desc => 'listable metadata tag name'
 
     define_rest_arg :include_meta,        :header => :emc,  :cli => ['include-meta', '-e', :flag], 
                     :desc => 'include object metadata in query result', :map => lambda{|v| v ? 1 : 0}

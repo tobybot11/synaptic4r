@@ -199,14 +199,16 @@ module Synaptic4r
     #.......................................................................................................
     def print
       ols = objs
-      oid = oids(ols); sys_meta = metadata(ols, 'SystemMetadataList')
+      oid = oids(ols)
+      sys_meta = metadata(ols, 'SystemMetadataList')
+      user_meta = metadata(ols, 'UserMetadataList', true)
       unless sys_meta.empty?
-        fmt = "%-30s %-10s %-s\n"
-        fmt % ['Name', 'Type', 'OID'] +
-        sys_meta.inject("") do |r,e| 
-          t = e['type']
-          r += fmt % [e['objname'], (t.eql?('regular') ? 'file' : t), e['objectid']]
-        end
+        fmt = "%-40s %-10s %-s\n"
+        fmt % ['Metadata', 'Type', 'OID'] +
+          sys_meta.inject("") do |r,e| 
+            t = e['type']
+            r += fmt % [user_meta.shift.keys.join(','), (t.eql?('regular') ? 'file' : t), e['objectid']]
+          end
       else
         "OID\n" + oid.join("\n").chomp
       end
@@ -220,21 +222,26 @@ module Synaptic4r
     end
 
     #.......................................................................................................
-    def metadata(ols, tag)
+    def metadata(ols, tag, is_listable=false)
       meta = ols.map{|o| o.elements.to_a(tag)}
-      meta.map{|a| a.empty? ? nil : a.first.elements.to_a.inject({}){|h,s| h.update(extract_attrs(s))}}.compact
+      meta.map{|a| a.empty? ? nil : a.first.elements.to_a.inject({}) do |h,s| 
+        a = extract_attrs(s, is_listable)
+        a.nil? ? h : h.update(a)
+      end}.compact
     end
 
     #.......................................................................................................
-    def extract_attrs(a)
-      {a.elements.to_a('Name').first.text => a.elements.to_a('Value').first.text}
+    def extract_attrs(a,is_listable)
+      add_item = if is_listable
+                   a.elements.to_a('Listable').first.text.eql?('true')
+                 else; true; end
+      add_item ? {a.elements.to_a('Name').first.text => a.elements.to_a('Value').first.text} : nil
     end
 
     #.......................................................................................................
     def objs
       @objs.elements.to_a('Object')      
     end
-
 
   #SorageObjectList
   end 
