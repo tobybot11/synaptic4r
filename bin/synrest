@@ -97,8 +97,8 @@ end
 ####---------------------------------------------------------------------------------------------------------
 def diagnostic_args(opts, input, cmd)
   opts.separator "\ndiagnostic options"
-  opts.on('-q', '--dump', 'do not send request but print headers and service url'){|d| input[:dump] = true}
-  opts.on('-p', '--payload', 'do not send request print payload if present'){|p| input[:payload] = true}
+  opts.on('-q', '--dump', 'do not send request but print headers and service url to STDOUT'){|d| input[:dump] = true}
+  opts.on('-p', '--payload', 'do not send request print payload to STDOUT if present'){|p| input[:payload] = true}
   opts.on('-l', '--log [file]', 'log request to file (by default file is synaptic4r.log)') do |file|
     input[:log] = true
     input[:log_file] = file
@@ -244,7 +244,9 @@ end
 ####---------------------------------------------------------------------------------------------------------
 def build_banner(opts, cmd)
   exp_args = Synaptic4r::Request.required_rest_args(cmd)
-  opts.banner = "\nUsage: synrest #{cmd.to_s.gsub(/_/,'-')} #{format_required_args(exp_args)} [options]"
+  opts.banner = Synaptic4r::Request.banner(cmd) || \
+                "\nUsage: synrest #{cmd.to_s.gsub(/_/,'-')} #{format_required_args(exp_args)} [options]"
+
 end
 
 ####---------------------------------------------------------------------------------------------------------

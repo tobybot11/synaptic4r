@@ -93,7 +93,8 @@ module Synaptic4r
                                                              else
                                                                pvals
                                                              end
-                                                     {:pvals => ovals, :dlen => ovals.length - pvals.length}}
+                                                     {:pvals => ovals, :dlen => ovals.length - pvals.length}},
+                       :banner            => 'synrest create-file file [remote-path|-i list-meta] [options]'
 
     define_rest_method :create_dir, 
                        :desc              => 'create a directory',
@@ -123,7 +124,7 @@ module Synaptic4r
                        :desc              => 'update listable user metadata for a file or directory',
                        :http_method       => :post,
                        :result_class      => Result,
-                       :required          => [[:rpath, :oid], :listable_meta], 
+                       :required          => [:listable_meta, [:rpath, :oid]], 
                        :optional          => [:namespace],
                        :query             => 'metadata/user'
 
@@ -148,7 +149,8 @@ module Synaptic4r
                                                         {:pvals => [''], :dlen => 1}
                                                       else
                                                         {:pvals => pvals, :dlen => 0}
-                                                      end}
+                                                      end},
+                       :banner            => 'synrest get [remote-path|-o oid] [options]'
 
     define_rest_method :get_by_tag, 
                        :desc              => 'get files and directories with specified listable user metadata tag',
@@ -216,7 +218,18 @@ module Synaptic4r
                                                      ext = req.extent(args[:file], args[:beginoffset], args[:endoffset])
                                                      req.set_header_range(args, ext)
                                                      req.add_payload(args, ext)
-                                                     req.set_header_extent(args, ext)}
+                                                     req.set_header_extent(args, ext)},
+                       :map_required_args => lambda {|vals|
+                                                     pvals = vals.select{|v| not /^-/.match(v)}
+                                                     ovals = if pvals.length.eql?(1)
+                                                               pvals + [pvals.first] 
+                                                             elsif /\/$/.match(pvals.last) and pvals.length.eql?(2)
+                                                               [pvals.first, pvals.last+File.basename(pvals.first)]
+                                                             else
+                                                               pvals
+                                                             end
+                                                     {:pvals => ovals, :dlen => ovals.length - pvals.length}},
+                       :banner            => 'synrest update file [remote-path|-o oid] [options]'
 
     #### DELETE    
     define_rest_method :delete, 

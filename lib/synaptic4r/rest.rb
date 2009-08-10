@@ -74,6 +74,7 @@ module Synaptic4r
           method_defs[m][:query] = args[:query]
           method_defs[m][:exe] = args[:exe]
           method_defs[m][:map_required_args] = args[:map_required_args]
+          method_defs[m][:banner] = args[:banner]
         end  
       end
 
@@ -139,6 +140,11 @@ module Synaptic4r
       #.......................................................................................................
       def exe(meth)
         args[meth][:exe]
+      end
+
+      #.......................................................................................................
+      def banner(meth)
+        args[meth][:banner]
       end
 
       #.......................................................................................................
