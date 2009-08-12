@@ -214,7 +214,7 @@ module Synaptic4r
         res = if args[:dump].nil? and args[:payload].nil?                
                 RestClient::Request.execute(:method => self.class.http_method(meth), :url => site, 
                                             :headers => headers, :payload => payload)
-              else; nil; end
+              end
         self.class.result_class(meth).new(:result => res, :headers => headers, :url => site, :sign => sign,
                                           :http_request => self.class.http_method(meth), 
                                           :payload => args[:payload] ? payload : nil)

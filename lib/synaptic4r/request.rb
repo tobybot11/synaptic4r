@@ -102,7 +102,7 @@ module Synaptic4r
                        :http_method       => :post,
                        :required          => [:rpath], 
                        :optional          => [:namespace],
-                       :exe               => lambda {|req, args| args[:rpath] += '/'}                                           
+                       :exe               => lambda {|req, args| args[:rpath] += '/'}  
 
     define_rest_method :create_version, 
                        :desc              => 'create an immutable version of a file or directory',

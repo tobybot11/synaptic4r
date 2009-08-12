@@ -1,0 +1,7 @@
+= synaptic4r
+
+Description goes here.
+
+== Copyright
+
+Copyright (c) 2009 ATT. See LICENSE for details.

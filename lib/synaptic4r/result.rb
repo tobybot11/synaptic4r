@@ -210,7 +210,7 @@ module Synaptic4r
             r += fmt % [user_meta.shift.keys.join(','), (t.eql?('regular') ? 'file' : t), e['objectid']]
           end
       else
-        "OID\n" + oid.join("\n").chomp
+        "OID\n" + oid.join("\n").chomp unless oid.empty?
       end
     end
 

@@ -9,7 +9,6 @@ require 'yaml'
 require 'optparse'
 require 'synaptic4r'
 require 'logger'
-require "#{File.dirname($0)}/help"
 
 #############################################################################################################
 ####---------------------------------------------------------------------------------------------------------
@@ -66,6 +65,8 @@ def run(cmd, input)
   rescue RestClient::Redirect, RestClient::ServerBrokeConnection, RestClient::RequestTimeout => err
     {:out => err.message, :logger => :error}
   rescue ArgumentError => err
+    {:out => err.to_s, :logger  => :error}
+  rescue Errno::ENOENT, Errno::EISDIR => err
     {:out => err.to_s, :logger  => :error}
   end
 end
@@ -264,7 +265,7 @@ def cmd_help(meths)
   puts "\nCommands"
   meths.sort_by{|m| m.to_s}.each do |m| 
     next if m.eql?(:get_started)
-    meth_str = " %-30s" % m.to_s.gsub(/_/,'-')
+    meth_str = "  %-30s" % m.to_s.gsub(/_/,'-')
     puts "#{meth_str} #{Synaptic4r::Request.desc(m)}"
   end
   puts "\nCommand args and options\n synrest command -h"
