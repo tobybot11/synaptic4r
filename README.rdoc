@@ -1,6 +1,6 @@
 = synaptic4r
 
-Description goes here.
+CLI and Ruby REST Client for ATT Synaptic Storage.
 
 == Copyright
 
