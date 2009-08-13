@@ -180,7 +180,7 @@ def extract_positional_args(meths, input, cmd)
             {:pvals => pvals, :dlen => 0}
           end
   if pvals.include?('-h')
-  elsif pvals.first.eql?('examples')
+  elsif ARGV.first.eql?('examples')
     begin
       send("#{cmd}_examples".to_sym)
       exit

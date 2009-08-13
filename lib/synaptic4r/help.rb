@@ -32,33 +32,33 @@ Save credentials to #{ENV['HOME']}/.synaptic4
 
 Basic Commands
    
- -list contents remote root directory    
+ - list contents remote root directory    
 
-   synrest get
+     synrest get
 
- -create a remote directory named foo    
+ - create a remote directory named foo    
 
-   synrest create-dir foo
+     synrest create-dir foo
 
- -upload a file to directory foo    
+ - upload a file to directory foo    
 
-  synrest create-file file.txt foo/
+     synrest create-file file.txt foo/
 
- -list contents remote directory foo   
+ - list contents remote directory foo   
 
-   synrest get foo
+     synrest get foo
 
- -list contents remote file foo/file.txt   
+ - list contents remote file foo/file.txt   
 
-  synrest get foo/file.txt
+     synrest get foo/file.txt
 
  - show more examples for a command
 
-   synrest command examples
+     synrest command examples
 
  - execute command for account other than default
 
-   synrest command args [options] -u myotheracct
+     synrest command args [options] -u myotheracct
 
 Diagnostic Options
 
@@ -91,6 +91,8 @@ end
 def create_file_examples
   puts <<-EXAMP
 
+File creation requires specification of either a remote filename of lsitable metadata tag.
+
  - upload a file to root directory and preserve the file name  
 
      synrest create-file file.txt
@@ -119,12 +121,9 @@ def create_file_examples
      synrest update file.txt -b 1000 -d 1499
      synrest update file.txt -b 1500 -d 1999
 
- - upload a file and specify listable metadata tags instead of file name.
-   files may be discovered by specifying either a name, listable meta tags or both
-   (see 'synrest get-all-tags', 'synrest get-by-tag', 'synrest get-tags' and 'synrest update-listable-metadata'). 
-   the tag is the name part of the listable metadata name=value pair. 
-   currently queries are only possible for over metadata names. queries over name=value are not supported. 
-   the value may be omitted when specifying a tag.
+ - upload a file and specify listable metadata tags instead of file name. listable
+   metadata consists of a name=value pair. specification of the value is
+   optional
 
      synrest create-file file.txt -i tagged
      synrest create-file file.txt -i tagged=yes,location
@@ -136,22 +135,8 @@ end
 def create_version_examples
   puts <<-EXAMP
 
-Things to know about versioning
+#{versioning_things_to_know}
 
- File or directory versions can only be accessed by OID.
-
- Deleting a file or directory will not delete its versions.
-
- Creating a version of a directory will create a version of all objects 
- in the directory 
-
- Creating a version of a previous file or directory version will create a version of the 
- current file or directory not the version on which the command was executed. 
-
- Meta-data cannot be modified on file or directory versions.
-
- Meta-data queries ignore meta-data assigned to file of directory versions.
- 
 Examples
 
  - create a version of a file by specifying remote file path
@@ -195,6 +180,25 @@ end
 def delete_user_metadata_examples
   puts <<-EXAMP
 
+#{user_metadata_things_to_know}
+
+Examples
+
+ - delete user metadata for a file by specifying remote file path  
+
+     synrest delete-user-metadata location foo/file.txt
+     synrest delete-user-metadata location,capital foo/file.txt
+
+ - delete user metadata for a directory by specifying remote directory path  
+
+     synrest delete-user-metadata building foo
+     synrest delete-user-metadata building,location foo
+
+ - delete user metadata for a storage object by specifying OID
+   
+     synrest delete-user-metadata building -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+     synrest delete-user-metadata building,location -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+
   EXAMP
 end
 
@@ -229,15 +233,15 @@ end
 def get_acl_examples
   puts <<-EXAMP
 
- - get access control list by specifying remote file path  
+ - get access control list for a file by specifying remote file path  
 
      synrest get-acl foo/file.txt
 
- - get access control list by specifying remote directory path  
+ - get access control list for a directory by specifying remote directory path  
 
      synrest get-acl foo
 
- - get access control list by specifying OID
+ - get access control list for a storage object by specifying OID
    
      synrest get-acl -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
 
@@ -248,18 +252,9 @@ end
 def get_all_tags_examples
   puts <<-EXAMP
 
-Things to know about listable meta-data tags
+#{user_metadata_things_to_know}
 
- Files may be discovered by specifying either a name, listable meta tags or both
- (see 'synrest get-all-tags' and 'synrest get-by-tag'). 
-
- The tag is the name part of the listable metadata name=value pair. 
-
- The value is not required when specifying a listable metadata for object creation.
-
- Queries are only possible for metadata names (i.e queries for name=value are not supported).
-
- Meta-data tags cannot be removed from the global tag index.
+Examples
    
  - get all listable metadata tags used by account
 
@@ -272,7 +267,9 @@ end
 def get_by_tag_examples
   puts <<-EXAMP
 
- - get all objects with specified listable metadata tag
+#{user_metadata_things_to_know}
+
+ - get OIDs for all objects with specified listable metadata tag. only one tag may be specified.
 
      synrest get-by-tag location
 
@@ -287,12 +284,36 @@ end
 def get_system_metadata_examples
   puts <<-EXAMP
 
+ - get system metadata for a file by specifying remote file path  
+
+     synrest get-system-metadata foo/file.txt
+
+ - get  system metadata for a directory by specifying remote directory path  
+
+     synrest get-system-metadata foo
+
+ - get  system metadata for a storage object by specifying OID
+   
+     synrest get-system-metadata -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+
   EXAMP
 end
 
 ####---------------------------------------------------------------------------------------------------------
 def get_tags_examples
   puts <<-EXAMP
+
+ - get listable metadata tags for a file by specifying remote file path  
+
+     synrest get-tags foo/file.txt
+
+ - get listable metadata tags for a directory by specifying remote directory path  
+
+     synrest get-tags foo
+
+ - get listable metadata tags for a storage object by specifying OID
+   
+     synrest get-tags -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
 
   EXAMP
 end
@@ -301,12 +322,46 @@ end
 def get_user_metadata_examples
   puts <<-EXAMP
 
+#{user_metadata_things_to_know}
+
+
+Examples
+ 
+ - get user metadata for a file by specifying remote file path  
+
+     synrest get-tags foo/file.txt
+
+ - get listable metadata tags for a directory by specifying remote directory path  
+
+     synrest get-tags foo
+
+ - get listable metadata tags for a storage object by specifying OID
+   
+     synrest get-tags -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+
   EXAMP
 end
 
 ####---------------------------------------------------------------------------------------------------------
 def get_versions_examples
   puts <<-EXAMP
+
+#{versioning_things_to_know}
+
+Examples
+
+ - get versions for a file by specifying remote file path  
+
+     synrest get-versions foo/file.txt
+
+ - get versions for a directory by specifying remote directory path  
+
+     synrest get-versions foo
+
+ - get versions for a storage object by specifying OID
+   
+     synrest get-versions -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+
 
   EXAMP
 end
@@ -315,14 +370,14 @@ end
 def update_examples
   puts <<-EXAMP
 
-Update does not delete storage objects before overwriting. Update will acquire new storage space
-as required but will not release storage space.
+#{updating_things_to_know}
+
+Examples
 
  - update a file
 
      synrest update file.txt
     
-
  - upload file in 500 byte increments.
 
      synrest create-file file.txt -b 0 -d 499
@@ -341,14 +396,96 @@ def update_acl_examples
 end
 
 ####---------------------------------------------------------------------------------------------------------
-def update_listable_metadata_examples
+ def update_listable_metadata_examples
   puts <<-EXAMP
 
-Things to know about listable meta-data tags
+#{user_metadata_things_to_know}
 
- Files may be discovered by specifying either a name, listable meta tags or both
- (see 'synrest get-all-tags' and 'synrest get-by-tag'). 
+Examples
+ 
+ - update listable metadata for a file by specifying remote file path  
 
+     synrest update-listbale-metadata town foo/file.txt
+     synrest update-listbale-metadata town=annapolis foo/file.txt
+     synrest update-listbale-metadata town=annapolis,capital=yes foo/file.txt
+
+ -  update listable metadata for a directory by specifying remote directory path  
+
+     synrest update-listbale-metadata town foo
+     synrest update-listbale-metadata town=baltimore foo
+     synrest update-listbale-metadata town=baltimore,capital=yes foo
+
+ - update listable metadata tags for a storage object by specifying OID
+   
+     synrest update-listbale-metadata town -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+     synrest update-listbale-metadata town=columbia -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+     synrest update-listbale-metadata town=columbia,capital=yes -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+
+  EXAMP
+end
+
+####---------------------------------------------------------------------------------------------------------
+def update_nonlistable_metadata_examples
+  <<-EXAMP
+
+#{user_metadata_things_to_know}
+
+Examples
+
+ - update nonlistable metadata for a file by specifying remote file path  
+
+     synrest update-nonlistbale-metadata building foo/file.txt
+     synrest update-nonlistbale-metadata building=house foo/file.txt
+     synrest update-nonlistbale-metadata building=house,public=no foo/file.txt
+
+ -  update nonlistable metadata for a directory by specifying remote directory path  
+
+     synrest update-nonlistbale-metadata building foo
+     synrest update-nonlistbale-metadata building=store foo
+     synrest update-nonlistbale-metadata building=store,public=yes foo
+
+ - update nonlistable metadata tags for a storage object by specifying OID
+   
+     synrest update-nonlistbale-metadata building -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+     synrest update-nonlistbale-metadata building=bar -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+     synrest update-nonlistbale-metadata building=bar,public=yes foo -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+
+  EXAMP
+end
+
+####---------------------------------------------------------------------------------------------------------
+def versioning_things_to_know
+   <<-KNOW
+Things to know about versioning
+
+ File or directory versions can only be accessed by OID.
+
+ Deleting a file or directory will not delete its versions.
+
+ Creating a version of a directory will create a version of all objects 
+ in the directory 
+
+ Creating a version of a previous file or directory version will create a version of the 
+ current file or directory not the version on which the command was executed. 
+
+ Metadata cannot be modified on file or directory versions.
+
+ Metadata queries ignore meta-data assigned to file of directory versions.
+  KNOW
+end
+
+####---------------------------------------------------------------------------------------------------------
+def user_metadata_things_to_know
+  <<-KNOW
+Things to know about meta-data
+
+ Metadata comes in two forms listable and nonlistable. Listable metadata is queryable
+ with 'get-by-tab' and nonlistable metadata is not queryable.
+
+ Files may be discovered by specifying either a name, listable meta tags or both. 
+
+ File creation requires specification of either a remote filename of lsitable metadata tag.
+ 
  The tag is the name part of the listable metadata name=value pair. 
 
  The value is not required when specifying a listable metadata for object creation.
@@ -356,13 +493,19 @@ Things to know about listable meta-data tags
  Queries are only possible for metadata names (i.e queries for name=value are not supported).
 
  Meta-data tags cannot be removed from the global tag index.
-
-  EXAMP
+  KNOW
 end
 
 ####---------------------------------------------------------------------------------------------------------
-def update_nonlistable_metadata_examples
-  puts <<-EXAMP
+def updating_things_to_know
+  <<-KNOW
+Things to know about updating
 
-  EXAMP
+ Update does not delete storage objects before overwriting. 
+
+ Update will acquire new storage space as required but will not release storage space.
+
+ Management of a file pointer would be required to know the end of a file if the update 
+ decreases the size of the file.
+  KNOW
 end

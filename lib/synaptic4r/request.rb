@@ -116,7 +116,7 @@ module Synaptic4r
                        :desc              => 'update nonlistable user metadata for a file or directory',
                        :http_method       => :post,
                        :result_class      => Result,
-                       :required          => [[:rpath, :oid], :meta], 
+                       :required          => [:meta, [:rpath, :oid]], 
                        :optional          => [:namespace],
                        :query             => 'metadata/user'
 
@@ -199,6 +199,7 @@ module Synaptic4r
                        :optional          => [:namespace, :tags],
                        :query             => 'listabletags'
 
+
     define_rest_method :get_tags, 
                        :desc              => 'get listable user metadata tags for a file or directory',
                        :http_method       => :get,
@@ -243,8 +244,9 @@ module Synaptic4r
                        :desc              => 'delete user metadata for a file or directory',
                        :result_class      => Result,
                        :http_method       => :delete,
-                       :required          => [[:rpath, :oid], :tags], 
-                       :optional          => [:namespace]
+                       :required          => [:tags, [:rpath, :oid]], 
+                       :optional          => [:namespace],
+                       :query             => 'metadata/user'
 
   
   #### Request

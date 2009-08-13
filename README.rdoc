@@ -1,6 +1,78 @@
 = synaptic4r
 
-CLI and Ruby REST Client for ATT Synaptic Storage.
+Ruby REST Client and CLI and for ATT Synaptic Storage. The CLI directly maps
+onto the REST API that can be used to inspect request headers and payloads and
+as a reference for the API. 
+
+== Install
+
+== Credentials
+
+Save credentials to $HOME/.synaptic4
+
+single account
+
+   subtenant: SubtenantID 
+   uid:       UserID
+   key:       SecretKey
+   site:      https://storage.synaptic.att.com/rest
+
+multiple accounts (the first is used by default, the dashes must 
+be included in the file)
+
+   -
+    account:   myacct
+    subtenant: SubtenantID 
+    uid:       UserID
+    key:       SecretKey
+    site:      https://storage.synaptic.att.com/rest
+
+   -
+    account:   myotheracct
+    subtenant: OtherSubtenantID 
+    uid:       OtherUserID
+    key:       OtherSecretKey
+    site:      https://storage.synaptic.att.com/rest
+
+== Basic CLI Commands
+   
+list information here
+
+        synrest get-started
+
+list all commands with descriptions
+
+	synrest
+
+list contents remote root directory    
+
+	synrest get
+
+create a remote directory named foo    
+
+     	synrest create-dir foo
+
+upload a file to directory foo    
+
+     	synrest create-file file.txt foo/
+
+list contents remote directory foo   
+
+     	synrest get foo
+
+list contents remote file foo/file.txt   
+
+     	synrest get foo/file.txt
+
+execute command for account other than default
+
+     	synrest command args [options] -u myotheracct
+
+show examples for a command
+
+     	synrest command examples
+
+
 
 == Copyright
 
