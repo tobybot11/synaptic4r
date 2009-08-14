@@ -2,24 +2,32 @@
 
 Gem::Specification.new do |s|
   s.name = %q{synaptic4r}
-  s.version = "0.0.0"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["troystribling-att"]
-  s.date = %q{2009-08-12}
+  s.date = %q{2009-08-14}
   s.email = %q{troy.stribling@usi.com}
   s.executables = ["synrest~", "synrest"]
   s.extra_rdoc_files = [
-    "README.rdoc"
+    "LICENSE",
+     "README.rdoc"
   ]
   s.files = [
-    "VERSION",
+    ".document",
+     ".gitignore",
+     "LICENSE",
+     "README.rdoc",
+     "Rakefile",
+     "VERSION",
      "bin/synrest",
      "lib/synaptic4r.rb",
      "lib/synaptic4r/client.rb",
+     "lib/synaptic4r/help.rb",
      "lib/synaptic4r/request.rb",
      "lib/synaptic4r/rest.rb",
-     "lib/synaptic4r/result.rb"
+     "lib/synaptic4r/result.rb",
+     "synaptic4r.gemspec"
   ]
   s.homepage = %q{http://github.com/troystribling-att/synaptic4r}
   s.rdoc_options = ["--charset=UTF-8"]
