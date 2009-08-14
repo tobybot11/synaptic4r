@@ -233,6 +233,10 @@ end
 def get_acl_examples
   puts <<-EXAMP
 
+#{acl_things_to_know}
+
+Examples
+
  - get access control list for a file by specifying remote file path  
 
      synrest get-acl foo/file.txt
@@ -374,10 +378,22 @@ def update_examples
 
 Examples
 
- - update a file
+ - update a file in root directory of the same name as the file. 
 
      synrest update file.txt
-    
+
+ - update a file in the root directory with a different from source file.
+
+     synrest update file.txt otherfile.text
+
+ - update a file in directory 'foo' with same name as source file.
+
+     synrest update file.txt foo/
+
+ - update a file in directory 'foo' with a name different from source file
+
+     synrest update file.txt foo/otherfile.txt
+
  - upload file in 500 byte increments.
 
      synrest create-file file.txt -b 0 -d 499
@@ -391,6 +407,28 @@ end
 ####---------------------------------------------------------------------------------------------------------
 def update_acl_examples
   puts <<-EXAMP
+
+#{acl_things_to_know}
+
+Examples
+
+ - give another user READ access to a file by specifing remote file path  
+
+     synrest update-acl SAM=READ foo/file.txt
+
+ - make a file world readable by specifing remote file path  
+
+     synrest update-acl -g OTHER=READ foo/file.txt
+
+ - update access control list for a directory by specifying remote directory path  
+
+     synrest update-acl SAM=READ foo
+
+ - update access control list for a storage object by specifying OID
+   
+     synrest update-acl SAM=READ -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+     synrest update-acl SAM=FULL_CONTROL -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+     synrest update-acl -g OTHER=READ -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
 
   EXAMP
 end
@@ -507,5 +545,24 @@ Things to know about updating
 
  Management of a file pointer would be required to know the end of a file if the update 
  decreases the size of the file.
+  KNOW
+end
+
+####---------------------------------------------------------------------------------------------------------
+def acl_things_to_know
+  <<-KNOW
+Things to know about access control
+
+ The only group access control list availabl eis OTHER.
+
+ User access control is specified with the user's UID.
+
+ Changing the access control list for a directory will not change the access
+ control list for storage objects within the directory.
+
+ Valid access control values are; NONE, FULL_CONTRL and READ.
+
+ Once a user has been added to the User Access Control List it cannot be removed. Access
+ can be disbled by setting the access control for he user to NONE.
   KNOW
 end

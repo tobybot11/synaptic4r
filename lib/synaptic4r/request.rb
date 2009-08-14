@@ -26,34 +26,34 @@ module Synaptic4r
     define_rest_arg :oid,                 :header => :none, :cli => ['oid', '-o'], 
                     :desc => 'system assigned object identifier'
 
-    define_rest_arg :rpath,               :header => :none, :cli => 'remote-path', 
+    define_rest_arg :rpath,               :header => :none, :cli => 'rpath', 
                     :desc => 'remote file or directory path'
 
     define_rest_arg :namespace,           :header => :none, :cli => ['namespace', '-n'], 
                     :desc => 'root namespace used for remote file path (default is uid)'
 
-    define_rest_arg :create_begin_offset, :header => :none, :cli => ['begin-offset', '-b'],
+    define_rest_arg :create_beginoffset, :header => :none, :cli => ['beginoffset', '-b'],
                     :desc => 'begining byte offset in file'
  
-    define_rest_arg :create_end_offset, :header => :none,   :cli => ['end-offset', '-d'],
+    define_rest_arg :create_endoffset, :header => :none,   :cli => ['endoffset', '-d'],
                     :desc => 'end byte offset in file'
 
     define_rest_arg :content_type,        :header => :http, :cli => ['content-type', '-c'], 
                     :desc => 'http content type'
 
-    define_rest_arg :beginoffset,         :header => :http, :cli => ['begin-offset', '-b'], 
+    define_rest_arg :beginoffset,         :header => :http, :cli => ['beginoffset', '-b'], 
                     :desc => 'begining byte offset in file'
 
-    define_rest_arg :endoffset,           :header => :http, :cli => ['end-offset', '-d'], 
+    define_rest_arg :endoffset,           :header => :http, :cli => ['endoffset', '-d'], 
                     :desc => 'end byte offset in file'
 
-    define_rest_arg :useracl,             :header => :emc,  :cli => ['user-acl', '-a'], 
+    define_rest_arg :useracl,             :header => :emc,  :cli => ['useracl', '-a'], 
                     :desc => 'access control list'
 
-    define_rest_arg :groupacl,            :header => :emc,  :cli => ['group-acl', '-g'], 
+    define_rest_arg :groupacl,            :header => :emc,  :cli => ['groupacl', '-g'], 
                     :desc => 'user group acess control list'
 
-    define_rest_arg :tags,                :header => :emc,  :cli => ['tag', '-t'], 
+    define_rest_arg :tags,                :header => :emc,  :cli => ['tags', '-t'], 
                     :desc => 'listable metadata tag name'
 
     define_rest_arg :include_meta,        :header => :emc,  :cli => ['include-meta', '-e', :flag], 
@@ -62,7 +62,7 @@ module Synaptic4r
     define_rest_arg :meta,                :header => :emc,  :cli => ['meta', '-m'], 
                     :desc => 'user nonlistable metadata name=value pairs'
 
-    define_rest_arg :listable_meta,       :header => :emc,  :cli => ['list-meta', '-i'], 
+    define_rest_arg :listable_meta,       :header => :emc,  :cli => ['listable-meta', '-i'], 
                     :desc => 'user listable metadata tag name=value pairs'
                                                            
     #.......................................................................................................
@@ -79,10 +79,10 @@ module Synaptic4r
                        :result_class      => StorageObject,
                        :http_method       => :post,
                        :required          => [:file, [:rpath, :listable_meta]], 
-                       :optional          => [:content_type, :namespace, :create_begin_offset, :create_end_offset],
+                       :optional          => [:content_type, :namespace, :create_beginoffset, :create_endoffset],
                        :exe               => lambda {|req, args| 
-                                                    ext = req.extent(args[:file], args[:create_begin_offset], 
-                                                              args[:create_end_offset])
+                                                    ext = req.extent(args[:file], args[:create_beginoffset], 
+                                                              args[:create_endoffset])
                                                     req.add_payload(args, ext)},
                        :map_required_args => lambda {|vals|
                                                      pvals = vals.select{|v| /^-i/.match(v) or not /^-/.match(v)}
@@ -94,7 +94,7 @@ module Synaptic4r
                                                                pvals
                                                              end
                                                      {:pvals => ovals, :dlen => ovals.length - pvals.length}},
-                       :banner            => 'synrest create-file file [remote-path|-i list-meta] [options]'
+                       :banner            => 'Usage: synrest create-file file [remote-path|-i list-meta] [options]'
 
     define_rest_method :create_dir, 
                        :desc              => 'create a directory',
@@ -150,7 +150,7 @@ module Synaptic4r
                                                       else
                                                         {:pvals => pvals, :dlen => 0}
                                                       end},
-                       :banner            => 'synrest get [remote-path|-o oid] [options]'
+                       :banner            => 'Usage: synrest get [remote-path|-o oid] [options]'
 
     define_rest_method :get_by_tag, 
                        :desc              => 'get files and directories with specified listable user metadata tag',
@@ -230,7 +230,7 @@ module Synaptic4r
                                                                pvals
                                                              end
                                                      {:pvals => ovals, :dlen => ovals.length - pvals.length}},
-                       :banner            => 'synrest update file [remote-path|-o oid] [options]'
+                        :banner            => 'Usage: synrest update file [remote-path|-o oid] [options]'
 
     #### DELETE    
     define_rest_method :delete, 
