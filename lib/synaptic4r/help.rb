@@ -4,7 +4,7 @@ def get_started
 
 Get Started
 
-Save credentials to #{ENV['HOME']}/.synaptic4
+Save credentials to #{ENV['HOME']}/.synaptic4r
 
  single account
 

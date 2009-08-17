@@ -8,7 +8,7 @@ as a reference for the API.
 
 == Credentials
 
-Save credentials to $HOME/.synaptic4
+Save credentials to $HOME/.synaptic4r
 
 single account
 
