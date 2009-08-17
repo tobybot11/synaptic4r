@@ -240,7 +240,7 @@ module Synaptic4r
 
     #.......................................................................................................
     def objs
-      @objs.elements.to_a('Object')      
+      @objs.nil? ? [] : @objs.elements.to_a('Object')    
     end
 
   #SorageObjectList

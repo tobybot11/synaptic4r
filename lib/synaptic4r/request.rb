@@ -157,7 +157,9 @@ module Synaptic4r
                        :result_class      => StorageObjectList,
                        :http_method       => :get,
                        :required          => [:tags], 
-                       :optional          => [:include_meta]
+                       :optional          => [:include_meta],
+                       :query             => 'listabletags'
+
 
     define_rest_method :get_user_metadata, 
                        :desc              => 'get both listable and nonlistable user metadata for a file or directory',
