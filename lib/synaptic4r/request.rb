@@ -157,8 +157,7 @@ module Synaptic4r
                        :result_class      => StorageObjectList,
                        :http_method       => :get,
                        :required          => [:tags], 
-                       :optional          => [:include_meta],
-                       :query             => 'listabletags'
+                       :optional          => [:include_meta]
 
 
     define_rest_method :get_user_metadata, 
