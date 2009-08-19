@@ -97,12 +97,14 @@ end
 
 ####---------------------------------------------------------------------------------------------------------
 def diagnostic_args(opts, input, cmd)
-  opts.separator "\ndiagnostic options"
-  opts.on('-q', '--dump', 'do not send request but print headers and service url to STDOUT'){|d| input[:dump] = true}
-  opts.on('-p', '--payload', 'do not send request print payload to STDOUT if present'){|p| input[:payload] = true}
-  opts.on('-l', '--log [file]', 'log request to file (by default file is synaptic4r.log)') do |file|
-    input[:log] = true
-    input[:log_file] = file
+  if Synaptic4r::Request.banner(cmd)
+    opts.separator "\ndiagnostic options"
+    opts.on('-q', '--dump', 'do not send request but print headers and service url to STDOUT'){|d| input[:dump] = true}
+    opts.on('-p', '--payload', 'do not send request print payload to STDOUT if present'){|p| input[:payload] = true}
+    opts.on('-l', '--log [file]', 'log request to file (by default file is synaptic4r.log)') do |file|
+      input[:log] = true
+      input[:log_file] = file
+    end
   end
   opts.on_tail('-h', '--help', "this listing\n") {
     puts 

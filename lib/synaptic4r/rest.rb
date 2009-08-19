@@ -75,6 +75,7 @@ module Synaptic4r
           method_defs[m][:exe] = args[:exe]
           method_defs[m][:map_required_args] = args[:map_required_args]
           method_defs[m][:banner] = args[:banner]
+          method_defs[m][:diagnosics] = args[:diagnostics]
         end  
       end
 
@@ -145,6 +146,11 @@ module Synaptic4r
       #.......................................................................................................
       def banner(meth)
         args[meth][:banner]
+      end
+
+      #.......................................................................................................
+      def diagnostics(meth)
+        args[meth][:diagnostics].nil? ? true : args[meth][:diagnostics]
       end
 
       #.......................................................................................................

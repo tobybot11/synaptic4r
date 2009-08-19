@@ -20,6 +20,9 @@ module Synaptic4r
     define_rest_arg :file,                :header => :none, :cli => 'file', 
                     :desc => 'file to upload'
 
+    define_rest_arg :lifetime,            :header => :none, :cli => ['lifetime', '-f'], 
+                    :desc => 'lifetime in minutes of request URL (default is 5minuts)'
+
     define_rest_arg :account,             :header => :none, :cli => ['account', '-u'], 
                     :desc => "user account name specified in #{ENV['HOME']}./synaptic4r"
 
@@ -249,6 +252,21 @@ module Synaptic4r
                        :optional          => [:namespace],
                        :query             => 'metadata/user'
 
+    #### Other methods    
+    define_rest_method :get_url, 
+                       :desc              => 'retrieve a shareable URL for linking to storage objects',
+                       :result_class      => Result,
+                       :http_method       => :delete,
+                       :required          => [[:rpath, :oid]], 
+                       :optional          => [:lifetime],
+                       :diagnostics       => false
+
+    #.......................................................................................................
+    # other requests
+    #.......................................................................................................
+    def get_url(args)
+    end
+    
   
   #### Request
   end

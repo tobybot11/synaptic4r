@@ -1,8 +1,8 @@
 = synaptic4r
 
-Ruby REST Client and CLI and for ATT Synaptic Storage. The CLI directly maps
-onto the REST API that can be used to inspect request headers and payloads and
-as a reference for the API. 
+Ruby REST Client and CLI for ATT Synaptic Storage. The CLI directly maps
+onto the REST API and can be used to inspect request headers and payloads, as well as,
+a reference for the REST API. 
 
 == Install
 
@@ -44,7 +44,7 @@ list all commands with descriptions
 
 	synrest
 
-list contents remote root directory    
+list contents of remote root directory   
 
 	synrest get
 
