@@ -21,7 +21,7 @@ module Synaptic4r
                     :desc => 'file to upload'
 
     define_rest_arg :lifetime,            :header => :none, :cli => ['lifetime', '-f'], 
-                    :desc => 'lifetime in minutes of request URL (default is 5minuts)'
+                    :desc => 'lifetime in minutes of request URL (default is 5 minuts)'
 
     define_rest_arg :account,             :header => :none, :cli => ['account', '-u'], 
                     :desc => "user account name specified in #{ENV['HOME']}./synaptic4r"
@@ -145,7 +145,7 @@ module Synaptic4r
                        :result_class      => Download,
                        :http_method       => :get,
                        :required          => [[:rpath, :oid]], 
-                       :optional          => [:namespace],
+                       :optional          => [:namespace, :beginoffset, :endoffset],
                        :map_required_args => lambda {|vals| 
                                                       pvals = vals.select{|v| /^-o/.match(v) or not /^-/.match(v)}
                                                       if pvals.empty?
@@ -153,6 +153,11 @@ module Synaptic4r
                                                       else
                                                         {:pvals => pvals, :dlen => 0}
                                                       end},
+                       :exe               => lambda {|req, args| 
+                                                     if args[:beginoffset] and args[:endoffset]
+                                                       ext = {:offset => args[:beginoffset].to_i,
+                                                              :length => args[:endoffset].to_i - args[:beginoffset].to_i + 1}
+                                                       req.set_header_range(args, ext); end},
                        :banner            => 'Usage: synrest get [remote-path|-o oid] [options]'
 
     define_rest_method :get_by_tag, 
@@ -253,9 +258,9 @@ module Synaptic4r
                        :query             => 'metadata/user'
 
     #### Other methods    
-    define_rest_method :get_url, 
+    define_rest_method :get_object_url, 
                        :desc              => 'retrieve a shareable URL for linking to storage objects',
-                       :result_class      => Result,
+                       :result_class      => ShareableUrl,
                        :http_method       => :delete,
                        :required          => [[:rpath, :oid]], 
                        :optional          => [:lifetime],
@@ -264,7 +269,16 @@ module Synaptic4r
     #.......................................................................................................
     # other requests
     #.......................................................................................................
-    def get_url(args)
+    def get_object_url(args)
+      esc = '/=&?%'
+      exp = (args[:lifetime].to_i || 5)*60 + Time.now.to_i
+      res = /.*(\/rest.*)/.match(url).captures.first
+      user = headers['x-emc-uid']
+      @sign = "GET\n#{res}\n#{user}\n#{exp}"
+      digest = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Base64.decode64(key), sign)
+      signature =  URI.encode(Base64.encode64(digest.to_s()).chomp(), esc)
+      user =  URI.encode(user, esc)
+      @url = "#{url}?uid=#{user}&expires=#{exp}&signature=#{signature}"
     end
     
   

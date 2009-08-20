@@ -75,7 +75,7 @@ module Synaptic4r
           method_defs[m][:exe] = args[:exe]
           method_defs[m][:map_required_args] = args[:map_required_args]
           method_defs[m][:banner] = args[:banner]
-          method_defs[m][:diagnosics] = args[:diagnostics]
+          method_defs[m][:diagnostics] = args[:diagnostics]
         end  
       end
 
@@ -194,7 +194,7 @@ module Synaptic4r
       include Utils
     
       #.......................................................................................................
-      attr_reader :headers, :uid, :key, :site, :subtenant, :payload, :meth, :sign
+      attr_reader :headers, :uid, :key, :site, :subtenant, :payload, :meth, :sign, :url
 
       #.......................................................................................................
       def initialize(args)
@@ -217,11 +217,15 @@ module Synaptic4r
         build_service_url(args)
         add_header_attr(args)
         create_signature
-        res = if args[:dump].nil? and args[:payload].nil?                
-                RestClient::Request.execute(:method => self.class.http_method(meth), :url => site, 
-                                            :headers => headers, :payload => payload)
+        res = if self.respond_to?(meth)
+                self.send(meth, args)
+              else
+                if args[:dump].nil? and args[:payload].nil?                
+                  RestClient::Request.execute(:method => self.class.http_method(meth), :url => url, 
+                                              :headers => headers, :payload => payload)
+                end
               end
-        self.class.result_class(meth).new(:result => res, :headers => headers, :url => site, :sign => sign,
+        self.class.result_class(meth).new(:result => res, :headers => headers, :url => url, :sign => sign,
                                           :http_request => self.class.http_method(meth), 
                                           :payload => args[:payload] ? payload : nil)
       end
@@ -263,7 +267,7 @@ module Synaptic4r
                else
                  'objects' + (args[:oid].nil? ? '' : "/#{args[:oid]}")
                end
-        @site = (/\/$/.match(site).nil? ? site + '/' : site) + surl + 
+        @url = (/\/$/.match(site).nil? ? site + '/' : site) + surl + 
           ((q = self.class.query(meth)).nil? ? '' : "?#{q}")
       end
 
@@ -280,9 +284,9 @@ module Synaptic4r
                            (headers['content-type']                   || '') + "\n" + \
                            (headers['range']                          || '') + "\n" + \
                            (headers['date']                           || '') + "\n"
-        if site
-          composite_string += URI.parse(site).path.downcase
-          composite_string += "?" + URI.parse(site).query.downcase unless URI.parse(site).query.nil?
+        if url
+          composite_string += URI.parse(url).path.downcase
+          composite_string += "?" + URI.parse(url).query.downcase unless URI.parse(url).query.nil?
         end
         composite_string += "\n" +  canonicalize_custom_headers
       end
@@ -298,9 +302,7 @@ module Synaptic4r
 
       #.......................................................................................................
       def set_header_range(args, ext)
-        if args[:file]
-          headers['range'] = "bytes=#{ext[:offset]}-#{ext[:offset]+ext[:length]-1}"
-        end
+        headers['range'] = "bytes=#{ext[:offset]}-#{ext[:offset]+ext[:length]-1}"
       end
 
       #.......................................................................................................
@@ -317,10 +319,8 @@ module Synaptic4r
 
       #.......................................................................................................
       def set_header_extent(args, ext)
-        if args[:file]
-          args[:beginoffset] = ext[:offset]
-          args[:endoffset] = ext[:offset] + ext[:length] - 1 
-        end
+        args[:beginoffset] = ext[:offset]
+        args[:endoffset] = ext[:offset] + ext[:length] - 1 
       end
 
       #.......................................................................................................

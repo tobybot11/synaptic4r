@@ -97,7 +97,7 @@ end
 
 ####---------------------------------------------------------------------------------------------------------
 def diagnostic_args(opts, input, cmd)
-  if Synaptic4r::Request.banner(cmd)
+  if Synaptic4r::Request.diagnostics(cmd)
     opts.separator "\ndiagnostic options"
     opts.on('-q', '--dump', 'do not send request but print headers and service url to STDOUT'){|d| input[:dump] = true}
     opts.on('-p', '--payload', 'do not send request print payload to STDOUT if present'){|p| input[:payload] = true}
