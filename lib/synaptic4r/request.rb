@@ -276,9 +276,8 @@ module Synaptic4r
       user = headers['x-emc-uid']
       @sign = "GET\n#{res}\n#{user}\n#{exp}"
       digest = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Base64.decode64(key), sign)
-      signature =  URI.encode(Base64.encode64(digest.to_s()).chomp(), esc)
-      user =  URI.encode(user, esc)
-      @url = "#{url}?uid=#{user}&expires=#{exp}&signature=#{signature}"
+      signature = Base64.encode64(digest.to_s()).chomp()
+      @url = "#{url}?uid=#{URI.encode(user, esc)}&expires=#{exp}&signature=#{URI.encode(signature, esc)}"
     end
     
   
