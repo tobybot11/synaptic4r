@@ -271,7 +271,7 @@ module Synaptic4r
     #.......................................................................................................
     def get_object_url(args)
       esc = '/=&?%'
-      exp = (args[:lifetime].to_i || 5)*60 + Time.now.to_i
+      exp = (args[:lifetime].nil? ? 5 : args[:lifetime].to_i)*60 + Time.now.to_i
       res = /.*(\/rest.*)/.match(url).captures.first
       user = headers['x-emc-uid']
       @sign = "GET\n#{res}\n#{user}\n#{exp}"
