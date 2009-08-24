@@ -226,6 +226,11 @@ def get_examples
 
      synrest get -o 4a08bf2ea11f1e0b04a6664b3866a804a7c60fb30b30
 
+ - get the portion of the file between bytes 50 and 150 specifying byte offsets 
+   and file name
+
+     synrest get foo/file.txt -b 50 -d 150
+
   EXAMP
 end
 
@@ -368,6 +373,35 @@ Examples
 
 
   EXAMP
+end
+
+####---------------------------------------------------------------------------------------------------------
+def get_object_url_examples
+  puts <<-EXAMP
+
+Things to know about object urls
+
+ Object urls have a specified lifetime.
+
+ The default lifetime of an object url is 5 minutes
+
+Examples
+
+ - get object url by specifying remote file path  
+
+     synrest get-object-url foo/file.txt
+
+ - get object url by specifying remote file path and lifetime of 20  minutes  
+
+     synrest get-object-url foo/file.txt -f 20
+
+ - get object url for a storage object by specifying OID
+   
+     synrest get-object-url -o 4a08bf2ea11f1e0b04a086663866a804a7c60fb30b30
+
+
+  EXAMP
+
 end
 
 ####---------------------------------------------------------------------------------------------------------
