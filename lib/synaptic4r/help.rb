@@ -91,7 +91,7 @@ end
 def create_file_examples
   puts <<-EXAMP
 
-File creation requires specification of either a remote filename of lsitable metadata tag.
+File creation requires specification of either a remote file name of listable metadata tag.
 
  - upload a file to root directory and preserve the file name  
 
@@ -446,11 +446,11 @@ def update_acl_examples
 
 Examples
 
- - give another user READ access to a file by specifing remote file path  
+ - give another user READ access to a file by specifying remote file path  
 
      synrest update-acl SAM=READ foo/file.txt
 
- - make a file world readable by specifing remote file path  
+ - make a file world readable by specifying remote file path  
 
      synrest update-acl -g OTHER=READ foo/file.txt
 
@@ -556,7 +556,7 @@ Things to know about meta-data
 
  Files may be discovered by specifying either a name, listable meta tags or both. 
 
- File creation requires specification of either a remote filename of lsitable metadata tag.
+ File creation requires specification of either a remote file name of listable metadata tag.
  
  The tag is the name part of the listable metadata name=value pair. 
 
@@ -587,16 +587,16 @@ def acl_things_to_know
   <<-KNOW
 Things to know about access control
 
- The only group access control list availabl eis OTHER.
+ The only group access control list available is OTHER.
 
  User access control is specified with the user's UID.
 
  Changing the access control list for a directory will not change the access
  control list for storage objects within the directory.
 
- Valid access control values are; NONE, FULL_CONTRL and READ.
+ Valid access control values are; NONE, FULL_CONTROL and READ.
 
  Once a user has been added to the User Access Control List it cannot be removed. Access
- can be disbled by setting the access control for he user to NONE.
+ can be disabled by setting the access control for he user to NONE.
   KNOW
 end
