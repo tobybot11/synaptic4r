@@ -591,6 +591,9 @@ Things to know about access control
 
  User access control is specified with the user's UID.
 
+ User and group access control privileges are only accepted for users with the
+ same subtenant ID.
+
  Changing the access control list for a directory will not change the access
  control list for storage objects within the directory.
 
