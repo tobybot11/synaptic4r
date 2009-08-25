@@ -6,6 +6,8 @@ a reference for the REST API.
 
 == Install
 
+	sudo gem install attsynaptic-synaptic4r --source=http://gems.github.com
+
 == Credentials
 
 Save credentials to $HOME/.synaptic4r
