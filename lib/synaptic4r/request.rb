@@ -264,7 +264,14 @@ module Synaptic4r
                        :http_method       => :delete,
                        :required          => [[:rpath, :oid]], 
                        :optional          => [:lifetime],
-                       :diagnostics       => false
+                       :diagnostics       => false,
+                       :map_required_args => lambda {|vals| 
+                                                      pvals = vals.select{|v| /^-o/.match(v) or not /^-/.match(v)}
+                                                      if pvals.empty?
+                                                        {:pvals => [''], :dlen => 1}
+                                                      else
+                                                        {:pvals => pvals, :dlen => 0}
+                                                      end}
 
     #.......................................................................................................
     # other requests
@@ -274,9 +281,9 @@ module Synaptic4r
       exp = (args[:lifetime].nil? ? 5 : args[:lifetime].to_i)*60 + Time.now.to_i
       res = /.*(\/rest.*)/.match(url).captures.first
       user = headers['x-emc-uid']
-      @sign = "GET\n#{res}\n#{user}\n#{exp}"
+      @sign = "GET\n" + "#{res}\n#{user}\n#{exp}".downcase
       digest = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Base64.decode64(key), sign)
-      signature = Base64.encode64(digest.to_s()).chomp()
+      signature = Base64.encode64(digest.to_s())
       @url = "#{url}?uid=#{URI.encode(user, esc)}&expires=#{exp}&signature=#{URI.encode(signature, esc)}"
     end
     
