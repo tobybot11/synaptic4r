@@ -7,9 +7,8 @@ begin
     gem.name = "synaptic4r"
     gem.summary = "CLI and Ruby REST Client for ATT Synaptic Storage"
     gem.email = "troy.stribling@usi.com"
-    gem.homepage = "http://github.com/troystribling-att/synaptic4r"
+    gem.homepage = "http://github.com/attsynaptic/synaptic4r"
     gem.authors = ["troystribling-att"]
-    gem.add_dependency('rake',        '>= 0.8.3')
     gem.add_dependency('rest-client', '>= 1.0.2')
   end
 

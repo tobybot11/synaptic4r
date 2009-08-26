@@ -252,7 +252,9 @@ module Synaptic4r
       #.......................................................................................................
       def set_remote_file(args)
         if args[:rpath]
-          if args[:namespace]
+          if args[:namespace] and args[:namespace].empty?
+            args[:rpath] =  args[:rpath]
+          elsif args[:namespace]
             args[:rpath] = args[:namespace] + '/' + args[:rpath]
           else
             args[:rpath] = uid + '/' + args[:rpath]

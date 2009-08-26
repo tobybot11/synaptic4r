@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
      "lib/synaptic4r/result.rb",
      "synaptic4r.gemspec"
   ]
-  s.homepage = %q{http://github.com/troystribling-att/synaptic4r}
+  s.homepage = %q{http://github.com/attsynaptic/synaptic4r}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.4}
@@ -41,14 +41,11 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<rake>, [">= 0.8.3"])
       s.add_runtime_dependency(%q<rest-client>, [">= 1.0.2"])
     else
-      s.add_dependency(%q<rake>, [">= 0.8.3"])
       s.add_dependency(%q<rest-client>, [">= 1.0.2"])
     end
   else
-    s.add_dependency(%q<rake>, [">= 0.8.3"])
     s.add_dependency(%q<rest-client>, [">= 1.0.2"])
   end
 end
