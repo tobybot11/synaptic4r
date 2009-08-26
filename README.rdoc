@@ -6,7 +6,14 @@ a reference for the REST API.
 
 == Install
 
-	sudo gem install attsynaptic-synaptic4r --source=http://gems.github.com
+The synptic4r gem is in the gemcutter.org repository. If gemcutter.org is not in your gem sources 
+issue the following command only one time,
+
+	sudo gem source -a http://gemcutter.org
+
+and install synaptic4r
+
+	sudo gem install synaptic4r
 
 == Credentials
 
