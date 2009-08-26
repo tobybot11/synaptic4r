@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-# build
+# build v0.1.5
 
 Gem::Specification.new do |s|
   s.name = %q{synaptic4r}
