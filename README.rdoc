@@ -6,7 +6,7 @@ a reference for the REST API.
 
 == Install
 
-The synptic4r gem is in the gemcutter.org repository. If gemcutter.org is not in your gem sources 
+The synptic4r gem is in the http:\\gemcutter.org repository. If gemcutter.org is not in your gem sources 
 issue the following command only one time,
 
 	sudo gem source -a http://gemcutter.org
