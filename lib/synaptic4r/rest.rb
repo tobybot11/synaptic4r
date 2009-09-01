@@ -25,7 +25,12 @@ module Synaptic4r
 
     #.......................................................................................................
     def read_file(file, offset, length)
-      IO.read(file, length, offset)
+      case file
+        when String
+          IO.read(file, length, offset)
+        else 
+          file.read
+      end
     end
 
   #### Utils
@@ -310,7 +315,11 @@ module Synaptic4r
       #.......................................................................................................
       def extent(file, begin_offset, end_offset)
         if file
-          file_offset = File.size(file) - 1
+          file_offset = case file
+                          when String then File.size(file)
+                          else 
+                            file.size
+                        end - 1
           offset =  begin_offset.to_i
           end_offset = end_offset.nil? ? file_offset : end_offset.to_i 
           end_offset = file_offset if end_offset > file_offset
