@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'rake'
 
+#####-------------------------------------------------------------------------------------------------------
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
@@ -16,6 +17,9 @@ rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: sudo gem install jeweler"
 end
 
+task :default => :test
+
+#####-------------------------------------------------------------------------------------------------------
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.libs << 'lib' << 'test'
@@ -23,6 +27,15 @@ Rake::TestTask.new(:test) do |test|
   test.verbose = true
 end
 
+#####-------------------------------------------------------------------------------------------------------
+Rake::TestTask.new(:test_case) do |test|
+  file = ENV["FILE"] || ''
+  test.libs << ['test/cases', 'test/helpers', 'test/messages']
+  test.test_files = ["test/cases/#{file}"]
+  test.verbose = true
+end
+
+#####-------------------------------------------------------------------------------------------------------
 begin
   require 'rcov/rcovtask'
   Rcov::RcovTask.new do |test|
@@ -36,9 +49,7 @@ rescue LoadError
   end
 end
 
-
-task :default => :test
-
+#####-------------------------------------------------------------------------------------------------------
 require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
   if File.exist?('VERSION.yml')
