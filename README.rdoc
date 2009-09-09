@@ -65,11 +65,11 @@ upload a file to directory foo
 
      	synrest create-file file.txt foo/
 
-list contents remote directory foo   
+list contents for remote directory foo   
 
      	synrest get foo
 
-list contents remote file foo/file.txt   
+list contents for remote file foo/file.txt   
 
      	synrest get foo/file.txt
 
