@@ -20,3 +20,4 @@ require 'synaptic4r'
 #####-------------------------------------------------------------------------------------------------------
 require 'mock'
 require 'matchers'
+require 'http_messages'

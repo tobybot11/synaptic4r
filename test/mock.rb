@@ -1,12 +1,13 @@
 ###########################################################################################################
-module RestClient
+module Synaptic4r
 
   #########################################################################################################
   class Request
 
     #......................................................................................................
-    def self.execute(args)
-      args
+    def http_request(args)
+p HttpMessages.send("#{meth.to_s}_response".to_sym, args)
+      HttpMessages.send("#{meth.to_s}_response".to_sym, args)
     end
 
   ### Rest 

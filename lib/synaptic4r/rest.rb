@@ -222,17 +222,21 @@ module Synaptic4r
         build_service_url(args)
         add_header_attr(args)
         create_signature
-        res = if self.respond_to?(meth)
-                self.send(meth, args)
-              else
-                if args[:dump].nil? and args[:payload].nil?                
-                  RestClient::Request.execute(:method => self.class.http_method(meth), :url => url, 
-                                              :headers => headers, :payload => payload)
-                end
-              end
-        self.class.result_class(meth).new(:result => res, :headers => headers, :url => url, :sign => sign,
+        self.class.result_class(meth).new(:result => http_request(args), :headers => headers, :url => url, :sign => sign,
                                           :http_request => self.class.http_method(meth), 
                                           :payload => args[:payload] ? payload : nil)
+      end
+
+      #.......................................................................................................
+      def http_request(args)
+        if self.respond_to?(meth)
+          self.send(meth, args)
+        else
+          if args[:dump].nil? and args[:payload].nil?                
+            RestClient::Request.execute(:method => self.class.http_method(meth), :url => url, 
+                                        :headers => headers, :payload => payload)
+          end
+        end
       end
 
       #.......................................................................................................
