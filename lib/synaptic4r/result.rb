@@ -5,7 +5,7 @@ module Synaptic4r
   class Result
 
     #.......................................................................................................
-    attr_reader :headers, :url, :http_request, :sign, :payload
+    attr_reader :headers, :url, :http_request, :sign, :payload, :result
 
     #.......................................................................................................
     def initialize(args)
@@ -14,13 +14,29 @@ module Synaptic4r
       @url = args[:url]
       @sign =  args[:sign]
       @payload = args[:payload]
+      @result = {}
+if args[:result]
+puts "RESULT HEADERS: #{args[:result].headers.inspect}"
+puts "RESULT BODY: #{args[:result].net_http_res.body.inspect}"
+end
+puts "URL: #{@url}"
+puts "HTTP REQUEST: #{@http_request}"
+puts "PAYLOAD\n#{@payload.inspect}"
+puts "HEADER\n #{@headers.inspect}"
     end
 
     #.......................................................................................................
     def print
     end
 
-  protected 
+    #.........................................................................................................
+    def method_missing(meth, *args, &blk)
+      if result.kind_of?(Hash) and result.keys.include?(meth)
+        result[meth]
+      else
+        result.send(meth, *args, &blk)
+      end
+    end
 
     #.......................................................................................................
     def extract_header(args, header)
@@ -55,23 +71,21 @@ module Synaptic4r
   class StorageObject < Result
     
     #.......................................................................................................
-    attr_reader :location, :date, :size, :oid
-
-    #.......................................................................................................
     def initialize(args)
       super
       if args[:result]
-        @location = args[:result].headers[:location]
-        @date = args[:result].headers[:date]
-        @size = args[:result].headers[:x_emc_delta]
-        @oid = /\/rest\/objects\/(.*)/.match(@location).captures.first
+        location = args[:result].headers[:location]
+        @result = {:oid =>      /\/rest\/objects\/(.*)/.match(location).captures.first,
+                   :location => location,
+                   :size =>     args[:result].headers[:x_emc_delta],
+                   :date =>     args[:result].headers[:date]}
       end
     end
 
     #.......................................................................................................
     def print
-      (@oid.nil? ? '' : "OID:  #{@oid}\n") + 
-      (@size.nil? ? '' : "size: #{@size} bytes")
+      (oid.nil? ? '' : "OID:  #{oid}\n") + 
+      (size.nil? ? '' : "size: #{size} bytes")
     end
 
   #Upload

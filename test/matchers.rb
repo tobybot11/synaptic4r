@@ -2,11 +2,6 @@
 def_matcher :send_request do |receiver, matcher, args|
   matched, exp = true, args.first
   pos_msg, neg_msg = '', ''
-  puts "url: #{receiver.url}"
-  puts "payload: #{receiver.payload}"
-  puts "http_request: #{receiver.http_request}"
-  puts "matcher: #{matcher}"
-  puts "args:#{args.inspect}"
   unless exp[:url].eql?(receiver.url) 
     pos_msg << "Expected 'url' of #{exp[:url]}, but found #{receiver.url}\n"
     matched = false

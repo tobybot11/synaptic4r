@@ -20,4 +20,12 @@ require 'synaptic4r'
 #####-------------------------------------------------------------------------------------------------------
 require 'mock'
 require 'matchers'
-require 'http_messages'
+Dir["test/*_messages.rb"].each{|f| require f}
+
+
+#.........................................................................................................
+def client
+  args = {:key=>'thesecret', :site=>'https://nowhere.com', :subtenant=>'abcdef1245', :uid=>'noone'}
+  client = Synaptic4r::Client.new(args)
+  [args, client]
+end
