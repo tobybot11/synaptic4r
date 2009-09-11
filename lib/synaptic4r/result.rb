@@ -15,14 +15,6 @@ module Synaptic4r
       @sign =  args[:sign]
       @payload = args[:payload]
       @result = {}
-if args[:result]
-puts "RESULT HEADERS: #{args[:result].headers.inspect}"
-puts "RESULT BODY: #{args[:result].net_http_res.body.inspect}"
-end
-puts "URL: #{@url}"
-puts "HTTP REQUEST: #{@http_request}"
-puts "PAYLOAD\n#{@payload.inspect}"
-puts "HEADER\n #{@headers.inspect}"
     end
 
     #.......................................................................................................
