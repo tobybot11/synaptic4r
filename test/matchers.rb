@@ -2,6 +2,16 @@
 def_matcher :send_request do |receiver, matcher, args|
   matched, exp = true, args.first
   pos_msg, neg_msg = '', ''
+  receiver.headers.delete('x-emc-date')
+  receiver.headers.delete('date')
+  receiver.headers.delete('x-emc-signature')
+  receiver.headers.delete('accept')
+  receiver.headers.delete('content-type')
+  receiver.headers.delete('x-emc-uid')
+  unless exp[:headers].eql?(receiver.headers) 
+    pos_msg << "Expected 'headers' #{exp[:headers].inspect}, but found #{receiver.headers.inspect}\n"
+    matched = false
+  end
   unless exp[:url].eql?(receiver.url) 
     pos_msg << "Expected 'url' of #{exp[:url]}, but found #{receiver.url}\n"
     matched = false

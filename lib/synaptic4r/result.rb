@@ -271,7 +271,8 @@ module Synaptic4r
       super   
       if args[:result]
         @content_type = args[:result].headers[:content_type]   
-        @body = args[:result].net_http_res.body     
+        @body = args[:result].net_http_res.body
+        @result = directory_entries   
       end
     end
 
@@ -287,7 +288,7 @@ module Synaptic4r
     #.......................................................................................................
     def directory_entries
       REXML::Document.new(@body).root.elements.to_a.first.elements.to_a.map do |i|
-        i.elements.inject(nil, {}){|h,e| h.update(e.name => e.text)}
+        i.elements.inject(nil, {}){|h,e| h.update(e.name.downcase.to_sym => e.text)}
       end
     end
 
@@ -298,8 +299,8 @@ module Synaptic4r
         fmt = "%-30s %-10s %-s\n"
         fmt % ['Name', 'Type', 'OID'] +
         dir_list.inject("") do |r,e| 
-          t = e['FileType']
-          r += fmt % [e['Filename'], (t.eql?('regular') ? 'file' : t), e['ObjectID']]
+          t = e[:filetype]
+          r += fmt % [e[:filename], (t.eql?('regular') ? 'file' : t), e[:objectid]]
         end
       end
     end

@@ -14,17 +14,17 @@ module CreateDirMessages
     def request(args)
       {:url          => "#{args[:site]}/namespace/#{args[:rpath]}",
        :http_request => :post,
+       :headers      => {},
        :payload      => nil}
     end
 
     #......................................................................................................
     def response(args)
-      HttpMessages::Result.new(:headers=> {:x_emc_delta=>    "0", 
-                             :date=>           date,
-                             :content_type=>   "text/plain; charset=UTF-8", 
-                             :content_length=> "0", 
-                             :location=>       "/rest/objects/#{oid}"},
-                             :body => '')
+      HttpMessages::Result.new(:headers=> {:x_emc_delta    =>   "0", 
+                                           :date           =>   date,
+                                           :content_type   =>   "text/plain; charset=UTF-8", 
+                                           :location       =>   "/rest/objects/#{oid}"},
+                               :body => '')
     end
 
   #### self
