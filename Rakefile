@@ -28,14 +28,6 @@ Rake::TestTask.new(:test) do |test|
 end
 
 #####-------------------------------------------------------------------------------------------------------
-Rake::TestTask.new(:test_case) do |test|
-  file = ENV["FILE"] || ''
-  test.libs << ['test/cases', 'test/helpers', 'test/messages']
-  test.test_files = ["test/cases/#{file}"]
-  test.verbose = true
-end
-
-#####-------------------------------------------------------------------------------------------------------
 begin
   require 'rcov/rcovtask'
   Rcov::RcovTask.new do |test|

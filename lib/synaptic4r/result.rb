@@ -270,15 +270,19 @@ module Synaptic4r
     def initialize(args)
       super   
       if args[:result]
-        @content_type = args[:result].headers[:content_type]   
         @body = args[:result].net_http_res.body
-        @result = directory_entries   
+        @result[:content_type] = args[:result].headers[:content_type]
+        if content_type.eql?('text/xml')
+          @result[:directory] = directory_entries
+        else
+          @result[:file] = @body
+        end
       end
     end
 
     #.......................................................................................................
     def print
-      if @content_type.eql?('text/xml')
+      if content_type.eql?('text/xml')
         print_directory_entries
       else
         @body

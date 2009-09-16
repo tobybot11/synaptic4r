@@ -14,13 +14,13 @@ module CreateDirMessages
     def request(args)
       {:url          => "#{args[:site]}/namespace/#{args[:rpath]}",
        :http_request => :post,
-       :headers      => {},
+       :headers      => {'content-type'   => 'application/octet-stream'},
        :payload      => nil}
     end
 
     #......................................................................................................
     def response(args)
-      HttpMessages::Result.new(:headers=> {:x_emc_delta    =>   "0", 
+      HttpMessages::Result.new(:headers=> {:x_emc_delta    =>   0, 
                                            :date           =>   date,
                                            :content_type   =>   "text/plain; charset=UTF-8", 
                                            :location       =>   "/rest/objects/#{oid}"},

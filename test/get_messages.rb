@@ -35,7 +35,7 @@ module GetMessages
   class << self
 
     #......................................................................................................
-    attr_reader :date, :get_dir_body, :get_dir_result
+    attr_reader :date, :get_dir_body, :get_dir_result, :get_dir_oid
     attr_accessor :response_method
 
     #......................................................................................................
@@ -49,14 +49,64 @@ module GetMessages
     def dir_namespace_request(args)
       {:url          => "#{args[:site]}/namespace/#{args[:rpath]}",
        :http_request => :get,
-       :headers      => {},
+       :headers      => {'content-type'   => 'application/octet-stream'},
        :payload      => nil}
     end
 
     #......................................................................................................
-    def get_dir_response(args)
+    def dir_objects_request(args)
+      {:url          => "#{args[:site]}/objects/#{args[:oid]}",
+       :http_request => :get,
+       :headers      => {'content-type'   => 'application/octet-stream'},
+       :payload      => nil}
+    end
+
+    #......................................................................................................
+    def dir_response(args)
       HttpMessages::Result.new(:headers => {:content_type=> "text/xml"}, 
-                               :body => get_dir_body)
+                               :body    => get_dir_body)
+    end
+
+    #......................................................................................................
+    # get file messages
+    #......................................................................................................
+    def file_namespace_request(args)
+      {:url          => "#{args[:site]}/namespace/#{args[:rpath]}",
+       :http_request => :get,
+       :headers      => {'content-type'   => 'application/octet-stream'},
+       :payload      => nil}
+    end
+
+    #......................................................................................................
+    def file_namespace_with_offset_request(args)
+      {:url          => "#{args[:site]}/namespace/#{args[:rpath]}",
+       :http_request => :get,
+       :headers      => {'endoffset'    => args[:endoffset], 
+                         'beginoffset'  => args[:beginoffset],
+                         'range'        =>"bytes=#{args[:beginoffset]}-#{args[:endoffset]}",
+                         'content-type' => 'application/octet-stream'},
+       :payload      => nil}
+    end
+
+    #......................................................................................................
+    def file_objects_request(args)
+      {:url          => "#{args[:site]}/objects/#{args[:oid]}",
+       :http_request => :get,
+       :headers      => {'content-type'   => 'application/octet-stream'},
+       :payload      => nil}
+    end
+
+    #......................................................................................................
+    def file_response(args)
+      HttpMessages::Result.new(:headers => {:content_type=> "text/xml"}, 
+                               :body    => get_dir_body)
+    end
+
+
+    #......................................................................................................
+    def file_offset_response(args)
+      HttpMessages::Result.new(:headers => {:content_type=> "text/xml"}, 
+                               :body    => get_dir_body)
     end
 
   #### self

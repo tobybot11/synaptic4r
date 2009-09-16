@@ -6,7 +6,6 @@ def_matcher :send_request do |receiver, matcher, args|
   receiver.headers.delete('date')
   receiver.headers.delete('x-emc-signature')
   receiver.headers.delete('accept')
-  receiver.headers.delete('content-type')
   receiver.headers.delete('x-emc-uid')
   unless exp[:headers].eql?(receiver.headers) 
     pos_msg << "Expected 'headers' #{exp[:headers].inspect}, but found #{receiver.headers.inspect}\n"
