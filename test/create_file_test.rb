@@ -33,11 +33,12 @@ class CreateFileTest < Test::Unit::TestCase
 
   #.........................................................................................................
   should "return OID, location and creation date for created file" do
-    a = @args.merge({:rpath=>'newdir'})
-    res = @client.create_dir(a)
-    res[:oid].should be(CreateDirMessages.oid)
-    res[:location].should be("/rest/objects/#{CreateDirMessages.oid}")
-    res[:date].should be(CreateDirMessages.date)
+    CreateFileMessages.response_method = :file_response
+    a = @args.merge({:listable_meta=>'test', :file => 'test/test.txt', :payload => true})
+    res = @client.create_file(a)
+    res[:oid].should be(CreateFileMessages.oid)
+    res[:location].should be("/rest/objects/#{CreateFileMessages.oid}")
+    res[:date].should be(CreateFileMessages.date)
   end
  
 end
