@@ -8,16 +8,17 @@ module CreateFileMessages
   class << self
 
     #......................................................................................................
-    attr_reader :oid, :date, :full_payload, :partial_payload
+    attr_reader :oid, :date, :full_payload, :partial_payload, :full_size
     attr_accessor :response_method
 
     #......................................................................................................
     def namespace_request(args)
       full_payload = args[:file].kind_of?(String) ? IO.read(args[:file]) : (args[:file].rewind; args[:file].read)
+      @full_size = full_payload.length
       full_content_md5 = Base64.encode64(Digest::MD5.digest(full_payload)).chomp()
       {:url          => "#{args[:site]}/namespace/#{args[:rpath]}",
        :http_request => :post,
-       :headers      => {'content-length' => 463,
+       :headers      => {'content-length' => full_size,
                          'content-md5'    => full_content_md5,
                          'content-type'   => 'application/octet-stream'},
        :payload      => full_payload}
@@ -25,11 +26,12 @@ module CreateFileMessages
 
     #......................................................................................................
     def listable_metadata_request(args)
-      full_payload = args[:file].kind_of?(String) ? IO.read(args[:file]) : (args[:file].rewind; args[:file].read)
+      full_payload = IO.read(args[:file])
+      @full_size = full_payload.length
       full_content_md5 = Base64.encode64(Digest::MD5.digest(full_payload)).chomp()
       {:url          => "#{args[:site]}/objects",
        :http_request => :post,
-       :headers      => {'content-length'      => 463,
+       :headers      => {'content-length'      => full_size,
                          'content-md5'         => full_content_md5,
                          'x-emc-listable-meta' => args[:listable_meta],
                          'content-type'        => 'application/octet-stream'},
@@ -43,7 +45,7 @@ module CreateFileMessages
 
     #......................................................................................................
     def file_response(args)
-      HttpMessages::Result.new(:headers=> {:x_emc_delta    =>   463,
+      HttpMessages::Result.new(:headers=> {:x_emc_delta    =>   full_size,
                                            :date           =>   date,
                                            :content_type   =>   "text/plain; charset=UTF-8", 
                                            :location       =>   "/rest/objects/#{oid}"},

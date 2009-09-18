@@ -32,13 +32,14 @@ class CreateFileTest < Test::Unit::TestCase
   end
 
   #.........................................................................................................
-  should "return OID, location and creation date for created file" do
+  should "return OID, location and creation date for created file when entire file is uploaded" do
     CreateFileMessages.response_method = :file_response
     a = @args.merge({:listable_meta=>'test', :file => 'test/test.txt', :payload => true})
     res = @client.create_file(a)
     res[:oid].should be(CreateFileMessages.oid)
     res[:location].should be("/rest/objects/#{CreateFileMessages.oid}")
     res[:date].should be(CreateFileMessages.date)
+    res[:size].should be(CreateFileMessages.full_size)
   end
  
 end
