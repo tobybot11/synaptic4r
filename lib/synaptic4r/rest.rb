@@ -321,6 +321,7 @@ module Synaptic4r
         if file
           file_offset = case file
                           when String then File.size(file)
+                          when File then file.stat.size
                           else 
                             file.size
                         end - 1

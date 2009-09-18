@@ -13,7 +13,7 @@ module CreateFileMessages
 
     #......................................................................................................
     def namespace_request(args)
-      full_payload = IO.read(args[:file])
+      full_payload = args[:file].kind_of?(String) ? IO.read(args[:file]) : (args[:file].rewind; args[:file].read)
       full_content_md5 = Base64.encode64(Digest::MD5.digest(full_payload)).chomp()
       {:url          => "#{args[:site]}/namespace/#{args[:rpath]}",
        :http_request => :post,
@@ -25,7 +25,7 @@ module CreateFileMessages
 
     #......................................................................................................
     def listable_metadata_request(args)
-      full_payload = IO.read(args[:file])
+      full_payload = args[:file].kind_of?(String) ? IO.read(args[:file]) : (args[:file].rewind; args[:file].read)
       full_content_md5 = Base64.encode64(Digest::MD5.digest(full_payload)).chomp()
       {:url          => "#{args[:site]}/objects",
        :http_request => :post,
