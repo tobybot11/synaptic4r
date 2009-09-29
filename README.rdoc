@@ -1,8 +1,6 @@
 = synaptic4r
 
-Ruby REST Client and CLI for ATT Synaptic Storage. The CLI directly maps
-onto the REST API and can be used to inspect request headers and payloads, as well as,
-a reference for the REST API. 
+Ruby CLI for ATT Synaptic Storage.
 
 == Install
 
