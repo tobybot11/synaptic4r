@@ -285,7 +285,7 @@ module Synaptic4r
       #.......................................................................................................
       def create_signature
         @sign = create_sign_string
-        digest = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Base64.decode64(key), sign)
+        digest = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA1.new, Base64.decode64(key), sign)
         headers['x-emc-signature'] = Base64.encode64(digest.to_s()).chomp()
       end
 

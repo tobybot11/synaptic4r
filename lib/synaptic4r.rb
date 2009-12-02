@@ -3,6 +3,7 @@ require 'base64'
 require 'time'
 require 'uri'
 require 'openssl'
+require 'digest'
 require 'rexml/document'
 
 require 'rubygems'
