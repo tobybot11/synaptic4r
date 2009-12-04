@@ -327,12 +327,12 @@ module Synaptic4r
 
    #.......................................................................................................
     def code
-      @err.elements.to_a('Code').first.text      
+      @err.elements.to_a('Code').first.text if @err.elements.to_a('Code').first    
     end
 
     #.......................................................................................................
     def message
-      @err.elements.to_a('Message').first.text      
+      @err.elements.to_a('Message').first.text if @err.elements.to_a('Message').first     
     end
 
     #.......................................................................................................
