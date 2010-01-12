@@ -11,7 +11,7 @@ module Synaptic4r
 
     #......................................................................................................
     def to_message_class(meth)
-      eval("#{meth.to_s.split('_').collect{|s| s.capitalize}.join}Messages")
+      eval("#{meth.to_s.split('_').map{|s| s.capitalize}.join}Messages")
     end
 
   ### Rest 

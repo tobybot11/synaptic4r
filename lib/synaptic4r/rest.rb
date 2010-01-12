@@ -28,8 +28,9 @@ module Synaptic4r
       case file
         when String
           IO.read(file, length, offset)
-        else 
-          file.read
+        else
+          file.seek(offset)
+          file.read(length)
       end
     end
 
@@ -37,7 +38,7 @@ module Synaptic4r
   end
 
   ###########################################################################################################
-  module Rest
+  module StorageRest
     
     #------------------------------------------------------------------------------------------------------
     class << self
@@ -202,12 +203,12 @@ module Synaptic4r
       attr_reader :headers, :uid, :key, :site, :subtenant, :payload, :meth, :sign, :url
 
       #.......................................................................................................
-      def initialize(args)
-        unary_args_given?([:uid, :subtenant, :key, :site], args)
-        @uid = args[:uid]
-        @key = args[:key]
-        @site = args[:site]
-        @subtenant = args[:subtenant]
+      def initialize(cred)
+        unary_args_given?([:uid, :subtenant, :key, :site], cred)
+        @uid = cred[:uid]
+        @key = cred[:key]
+        @site = cred[:site]
+        @subtenant = cred[:subtenant]
         @headers = credentials
       end
 
@@ -364,7 +365,7 @@ module Synaptic4r
     end
 
      
-  ### Rest 
+  ### Storage Rest 
   end
 
 #### Synaptic4r

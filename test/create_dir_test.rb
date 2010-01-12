@@ -15,7 +15,6 @@ class CreateDirTest < Test::Unit::TestCase
     @client.create_dir(a).should send_request(CreateDirMessages.request(a))
   end
 
-
   #.........................................................................................................
   should "return OID, location and creation date for created directory" do
     a = @args.merge({:rpath=>'newdir'})

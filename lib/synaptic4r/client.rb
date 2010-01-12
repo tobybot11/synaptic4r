@@ -17,7 +17,7 @@ module Synaptic4r
     end
 
     #.........................................................................................................
-    attr_reader :uid, :key, :site, :resource, :subtenant
+    attr_reader :credentials
   
     #.........................................................................................................
     def initialize(args = nil)
@@ -40,16 +40,13 @@ module Synaptic4r
         end
       end
       unary_args_given?(symbolize(config_params), args.keys)
-      @subtenant = args[:subtenant]
-      @uid = args[:uid]
-      @key = args[:key]
-      @site = args[:site]
+      @credentials= {:subtenant => args[:subtenant], :uid => args[:uid], :key => args[:key], :site => args[:site]}
     end
 
     #.........................................................................................................
     def method_missing(meth, *args, &blk)
-      if Request.has_rest_method?(meth)
-        Request.new(:uid => uid, :subtenant => subtenant, :key => key, :site => site).execute(meth, *args, &blk)
+      if StorageRequest.has_rest_method?(meth)
+        StorageRequest.new(credentials).execute(meth, *args, &blk)
       else
         super
       end

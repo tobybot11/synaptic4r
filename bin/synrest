@@ -86,7 +86,7 @@ end
 ####---------------------------------------------------------------------------------------------------------
 def format_required_args(args)
   args.inject("") do |f,a|
-    aname = lambda{|v,l| arg_name(Synaptic4r::Request.rest_arg(v),l)}
+    aname = lambda{|v,l| arg_name(Synaptic4r::StorageRequest.rest_arg(v),l)}
     if a.kind_of?(Array)
       f + [aname[a.first,false],a[1..-1].map{|v| aname[v,true]}].join('|') + ' '  
     else
@@ -97,7 +97,7 @@ end
 
 ####---------------------------------------------------------------------------------------------------------
 def diagnostic_args(opts, input, cmd)
-  if Synaptic4r::Request.diagnostics(cmd)
+  if Synaptic4r::StorageRequest.diagnostics(cmd)
     opts.separator "\ndiagnostic options"
     opts.on('-q', '--dump', 'do not send request but print headers and service url to STDOUT'){|d| input[:dump] = true}
     opts.on('-p', '--payload', 'do not send request print payload to STDOUT if present'){|p| input[:payload] = true}
@@ -120,7 +120,7 @@ def set_opts(opts, input, opt_args)
   unless opt_args.empty?
     opts.separator "\noptions"
     opt_args.sort_by{|m| m.to_s}.each do |a|
-      arg_info = Synaptic4r::Request.rest_arg(a)
+      arg_info = Synaptic4r::StorageRequest.rest_arg(a)
       sopt = arg_info[:cli][1]
       lopt = "--#{arg_info[:cli][0]}" + (arg_info[:cli][2].eql?(:flag) ? '' : " #{arg_info[:cli][0]}")
       opts.on(sopt, lopt, arg_info[:desc]) do |v|
@@ -133,11 +133,11 @@ end
 ####---------------------------------------------------------------------------------------------------------
 def set_args(opts, meths, input, cmd)
   extract_positional_args(meths, input, cmd)
-  all_args = Synaptic4r::Request.required_rest_args(cmd)
+  all_args = Synaptic4r::StorageRequest.required_rest_args(cmd)
   fmt = "    %-32s %s"
   unless all_args.empty?
     opts.separator "\nargs"
-    arg_row = lambda{|a,l| arg_info = Synaptic4r::Request.rest_arg(a)
+    arg_row = lambda{|a,l| arg_info = Synaptic4r::StorageRequest.rest_arg(a)
                            opts.separator fmt % [arg_name(arg_info,l), arg_info[:desc]]}
     all_args.each do |a|
       if a.kind_of?(Array)
@@ -173,11 +173,11 @@ end
 
 ####---------------------------------------------------------------------------------------------------------
 def extract_positional_args(meths, input, cmd)
-  eargs = Synaptic4r::Request.required_rest_args(cmd)
+  eargs = Synaptic4r::StorageRequest.required_rest_args(cmd)
   elength = eargs.length
   pvals= prep_argv.first(elength)
-  nvals = if Synaptic4r::Request.map_required_args(cmd)
-            Synaptic4r::Request.map_required_args(cmd)[pvals]
+  nvals = if Synaptic4r::StorageRequest.map_required_args(cmd)
+            Synaptic4r::StorageRequest.map_required_args(cmd)[pvals]
           else 
             {:pvals => pvals, :dlen => 0}
           end
@@ -200,7 +200,7 @@ end
 
 ####---------------------------------------------------------------------------------------------------------
 def set_positional_args(input, nvals, eargs)
-  assign_input = lambda{|a,v| info = Synaptic4r::Request.rest_arg(a); 
+  assign_input = lambda{|a,v| info = Synaptic4r::StorageRequest.rest_arg(a); 
                               input[a] = info[:map].nil? ? v : info[:map][v]}
   length = 0
   nvals[:pvals].each_index do |i|
@@ -210,7 +210,7 @@ def set_positional_args(input, nvals, eargs)
       if /^-/.match(pv)
         matched = false
         ea[1..-1].each do |a|
-          info = Synaptic4r::Request.rest_arg(a)
+          info = Synaptic4r::StorageRequest.rest_arg(a)
           flag = info[:cli][1]
           next unless flag
           if /^#{flag}/.match(pv)
@@ -246,8 +246,8 @@ end
 
 ####---------------------------------------------------------------------------------------------------------
 def build_banner(opts, cmd)
-  exp_args = Synaptic4r::Request.required_rest_args(cmd)
-  opts.banner = Synaptic4r::Request.banner(cmd) || \
+  exp_args = Synaptic4r::StorageRequest.required_rest_args(cmd)
+  opts.banner = Synaptic4r::StorageRequest.banner(cmd) || \
                 "\nUsage: synrest #{cmd.to_s.gsub(/_/,'-')} #{format_required_args(exp_args)} [options]"
 
 end
@@ -256,7 +256,7 @@ end
 def process_input(opts, meths, input, cmd)
   build_banner(opts, cmd)
   set_args(opts, meths, input, cmd)
-  set_opts(opts, input, Synaptic4r::Request.optional_rest_args(cmd))
+  set_opts(opts, input, Synaptic4r::StorageRequest.optional_rest_args(cmd))
   diagnostic_args(opts, input, cmd)
 end
 
@@ -268,7 +268,7 @@ def cmd_help(meths)
   meths.sort_by{|m| m.to_s}.each do |m| 
     next if m.eql?(:get_started)
     meth_str = "  %-30s" % m.to_s.gsub(/_/,'-')
-    puts "#{meth_str} #{Synaptic4r::Request.desc(m)}"
+    puts "#{meth_str} #{Synaptic4r::StorageRequest.desc(m)}"
   end
   puts "\nCommand args and options\n synrest command -h"
   puts "\nGet Started\n synrest get-started"
@@ -276,7 +276,7 @@ def cmd_help(meths)
 end
 
 ####---------------------------------------------------------------------------------------------------------
-meths = Synaptic4r::Request.rest_methods << :get_started
+meths = Synaptic4r::StorageRequest.rest_methods << :get_started
 input = {}
 cmd = extract_cmd(meths)
 
