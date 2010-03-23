@@ -1,11 +1,10 @@
-#!/usr/bin/ruby
+#!/usr/local/bin/ruby
 
 ####---------------------------------------------------------------------------------------------------------
 SYNLIB = "#{File.dirname($0)}/../lib"
 $:.unshift(SYNLIB) unless $:.include?(SYNLIB)
 
 ####---------------------------------------------------------------------------------------------------------
-require 'yaml'
 require 'optparse'
 require 'synaptic4r'
 require 'logger'
@@ -61,7 +60,7 @@ def run(cmd, input)
     {:out => (input[:dump] or input[:payload]) ? dump(cmd, input, result) : result.print, :logger => :info}
   rescue RestClient::RequestFailed, RestClient::ResourceNotFound, RestClient::Unauthorized, 
          RestClient::NotModified => err
-    {:out => "#{err.message}\n" + Synaptic4r::RequestError.new(err).print, :logger => :error}
+    {:out => "#{err.http_code}\n#{err.message}\n" + Synaptic4r::RequestError.new(err).print, :logger => :error}
   rescue RestClient::Redirect, RestClient::ServerBrokeConnection, RestClient::RequestTimeout => err
     {:out => err.message, :logger => :error}
   rescue ArgumentError => err

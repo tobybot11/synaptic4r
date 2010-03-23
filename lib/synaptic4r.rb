@@ -4,6 +4,7 @@ require 'time'
 require 'uri'
 require 'openssl'
 require 'digest'
+require 'yaml'
 require 'rexml/document'
 
 require 'rubygems'
