@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{synaptic4r}
-  s.version = "0.1.8"
+  s.version = "0.1.9"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["troystribling-att"]
-  s.date = %q{2010-03-23}
+  s.date = %q{2010-06-08}
   s.default_executable = %q{synrest}
   s.email = %q{troy.stribling@usi.com}
   s.executables = ["synrest"]
@@ -49,13 +49,13 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.5}
   s.summary = %q{CLI and Ruby REST Client for ATT Synaptic Storage}
   s.test_files = [
-    "test/create_dir_test.rb",
-     "test/get_test.rb",
-     "test/create_file_messages.rb",
-     "test/mock.rb",
-     "test/matchers.rb",
+    "test/matchers.rb",
      "test/create_dir_messages.rb",
+     "test/create_file_messages.rb",
+     "test/get_test.rb",
      "test/get_messages.rb",
+     "test/mock.rb",
+     "test/create_dir_test.rb",
      "test/create_file_test.rb",
      "test/helper.rb"
   ]
